@@ -4,25 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>YOLO Annotator</title>
-    <!-- Optionnel: Ajouter des icônes (exemple avec Font Awesome, nécessite une configuration) -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
     <style>
         :root {
-            --app-bg-color: #f0f2f5; /* Fond d'application plus neutre */
+            --app-bg-color: #f0f2f5;
             --card-bg-color: #ffffff;
-            --primary-color: #007aff; /* Bleu iOS-like */
+            --primary-color: #007aff;
             --primary-text-color: #ffffff;
-            --secondary-text-color: #8e8e93; /* Gris iOS pour texte secondaire */
-            --text-color: #1c1c1e; /* Noir iOS pour texte principal */
+            --secondary-text-color: #8e8e93;
+            --text-color: #1c1c1e;
             --border-color: #c6c6c8;
             --header-height: 50px;
             --bottom-action-bar-height: 60px;
-            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px); /* Pour encoche iPhone */
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Enlève le flash bleu au toucher sur mobile */
+            -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
@@ -32,8 +30,8 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--app-bg-color);
             color: var(--text-color);
-            font-size: 16px; /* Base pour mobile */
-            overflow-x: hidden; /* Empêche le scroll horizontal */
+            font-size: 16px;
+            overflow-x: hidden;
         }
 
         .app-container {
@@ -43,7 +41,6 @@
             width: 100%;
         }
 
-        /* --- Header --- */
         .app-header {
             background-color: var(--card-bg-color);
             color: var(--text-color);
@@ -54,7 +51,7 @@
             font-size: 1.1em;
             font-weight: 600;
             border-bottom: 1px solid #e0e0e0;
-            position: fixed; /* Ou sticky */
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -62,14 +59,13 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        /* --- Content Area --- */
         .app-content {
             flex-grow: 1;
             padding: 15px;
-            overflow-y: auto; /* Scroll uniquement pour le contenu */
-            -webkit-overflow-scrolling: touch; /* Scroll fluide sur iOS */
-            margin-top: var(--header-height); /* Espace pour le header fixe */
-            padding-bottom: calc(var(--bottom-action-bar-height) + var(--safe-area-inset-bottom) + 15px); /* Espace pour la barre d'action et l'encoche */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: var(--header-height);
+            padding-bottom: calc(var(--bottom-action-bar-height) + var(--safe-area-inset-bottom) + 15px);
         }
 
         .card {
@@ -98,6 +94,20 @@
             font-size: 0.95em;
             color: var(--text-color);
         }
+        /* Custom file input label style */
+        .file-input-label {
+            display: block; /* Pour qu'il prenne toute la largeur */
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed var(--primary-color);
+            border-radius: 8px;
+            background-color: var(--app-bg-color);
+            color: var(--primary-color);
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 5px; /* Réduit si fileNameDisplay est en dessous */
+            font-weight: 500;
+        }
 
         input[type="text"],
         input[type="number"],
@@ -107,24 +117,10 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1em;
-            background-color: #f8f8f8; /* Fond leggerement different pour inputs */
+            background-color: #f8f8f8;
             margin-bottom: 15px;
         }
-        input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px dashed var(--primary-color);
-            border-radius: 8px;
-            background-color: var(--app-bg-color);
-            color: var(--primary-color);
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-        input[type="file"]::file-selector-button { /* Style le bouton "Parcourir" */
-            display: none; /* On cache le bouton par défaut, le label fait office */
-        }
-
+        /* input[type="file"] est caché, le label est utilisé */
 
         .checkbox-container {
             display: flex;
@@ -135,13 +131,12 @@
             margin-right: 10px;
             width: 20px;
             height: 20px;
-            accent-color: var(--primary-color); /* Couleur de la coche */
+            accent-color: var(--primary-color);
         }
         .checkbox-container label {
             margin-bottom: 0;
             font-weight: normal;
         }
-
 
         #modelStatus {
             font-size: 0.9em;
@@ -150,35 +145,41 @@
             padding: 5px 0;
         }
 
+        /* MODIFIED/REVIEWED STYLES FOR IMAGE PREVIEW */
         .image-preview-container {
             width: 100%;
-            min-height: 200px;
-            max-height: 40vh;
+            min-height: 180px; /* Ajusté pour mobile */
+            max-height: 45vh; /* Conserve une hauteur relative à la vue */
             background-color: #e9ecef;
             border-radius: 8px;
-            display: flex;
+            display: flex; /* Utilisé pour centrer le placeholder */
             align-items: center;
             justify-content: center;
-            margin-top: 15px;
-            position: relative;
-            overflow: hidden;
+            margin-top: 10px; /* Un peu moins d'espace si fileNameDisplay est là */
+            position: relative; /* Crucial pour le positionnement absolu des enfants */
+            overflow: hidden; /* Empêche tout débordement */
         }
+
         #uploadedImageDisplay {
-            max-width: 100%;
-            max-height: 100%; /* S'adapte au conteneur */
-            object-fit: contain;
-            display: none; /* Caché initialement */
+            display: none; /* Initialement caché, affiché par JS */
+            /* width et height seront définis par JS pour maintenir l'aspect ratio */
+            /* position: absolute et top/left seront définis par JS pour le centrage */
+            object-fit: contain; /* Assure que l'image est contenue si ses dimensions JS sont plus grandes que l'espace réel */
         }
+
         #overlayCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: absolute; /* Positionné par rapport à .image-preview-container */
+            /* top, left, width, height seront définis par JS */
             pointer-events: none;
+            display: none; /* Initialement caché, affiché avec l'image */
         }
         .image-placeholder-text {
             color: var(--secondary-text-color);
             font-size: 0.9em;
+            text-align: center; /* S'assurer que le texte est centré */
         }
+        /* END OF MODIFIED/REVIEWED STYLES FOR IMAGE PREVIEW */
+
 
         .log-output-card .card-title {
             margin-bottom: 8px;
@@ -195,7 +196,6 @@
             color: #495057;
         }
 
-        /* --- Bottom Action Bar --- */
         .app-bottom-actions {
             position: fixed;
             bottom: 0;
@@ -206,7 +206,7 @@
             padding-bottom: var(--safe-area-inset-bottom);
             display: flex;
             align-items: center;
-            justify-content: space-around; /* Ou space-evenly */
+            justify-content: space-around;
             border-top: 1px solid #e0e0e0;
             box-shadow: 0 -1px 5px rgba(0,0,0,0.08);
             z-index: 100;
@@ -218,26 +218,25 @@
             background-color: var(--primary-color);
             color: var(--primary-text-color);
             border: none;
-            border-radius: 8px; /* Moins arrondi pour s'intégrer dans la barre */
+            border-radius: 8px;
             font-size: 0.95em;
             font-weight: 500;
             text-align: center;
             cursor: pointer;
-            margin: 0 8px; /* Espace entre les boutons */
+            margin: 0 8px;
             height: 40px;
+            line-height: 20px; /* Aide au centrage vertical du texte */
         }
         .action-button:disabled {
-            background-color: #b0bec5; /* Gris plus clair pour désactivé */
+            background-color: #b0bec5;
             color: #e0e0e0;
             cursor: not-allowed;
         }
-        .action-button.secondary { /* Pour un style de bouton secondaire si besoin */
+        .action-button.secondary {
             background-color: #e9ecef;
             color: var(--primary-color);
         }
 
-
-        /* Accordion for advanced settings */
         details {
             background-color: var(--card-bg-color);
             border-radius: 10px;
@@ -248,8 +247,8 @@
             padding: 15px;
             font-weight: 500;
             cursor: pointer;
-            list-style-position: inside; /* Pour l'indicateur */
-            border-bottom: 1px solid var(--app-bg-color); /* Séparateur si ouvert */
+            list-style-position: inside;
+            border-bottom: 1px solid var(--app-bg-color);
         }
         details[open] summary {
             border-bottom: 1px solid #e0e0e0;
@@ -257,31 +256,28 @@
         details .details-content {
             padding: 0 15px 15px 15px;
         }
-        details summary::marker { /* Style l'indicateur (flèche) */
+        details summary::marker {
            color: var(--primary-color);
         }
 
-
-        /* --- Responsive pour Desktop --- */
         @media (min-width: 768px) {
-            body { font-size: 14px; } /* Ajuster la base de police pour desktop */
+            body { font-size: 14px; }
             .app-header { justify-content: flex-start; padding-left: 20px; }
             .app-content {
-                max-width: 900px; /* Limite la largeur du contenu principal */
-                margin: var(--header-height) auto 0 auto; /* Centre le contenu */
+                max-width: 900px;
+                margin: var(--header-height) auto 0 auto;
                 padding: 20px;
-                padding-bottom: 20px; /* Pas besoin de bottom-action-bar sur desktop */
+                padding-bottom: 20px;
             }
-            .app-bottom-actions { display: none; } /* Cacher la barre d'action du bas */
+            .app-bottom-actions { display: none; }
 
-            /* Afficher les boutons d'action dans le contenu principal sur desktop */
             .desktop-actions-container {
                 display: flex;
                 gap: 15px;
                 margin-top: 20px;
             }
             .desktop-actions-container .action-button {
-                margin: 0; /* Reset margin */
+                margin: 0;
             }
 
             .main-layout-desktop {
@@ -292,12 +288,11 @@
                 flex: 1;
             }
              .image-preview-container {
-                max-height: none; /* Permettre plus de hauteur */
+                max-height: 500px; /* Plus de hauteur sur desktop */
                 min-height: 300px;
             }
             pre { max-height: 200px; }
         }
-
     </style>
 </head>
 <body>
@@ -320,11 +315,10 @@
                     <section class="card">
                         <h2 class="card-title">2. Image à Analyser</h2>
                         <label for="imageUpload" class="file-input-label">
-                            Cliquer ici pour choisir une image
-                            <input type="file" id="imageUpload" accept="image/*" style="display:none;">
-                            <!-- Le input file est caché, le label déclenche son clic -->
+                            Choisir une image
                         </label>
-                         <p class="card-subtitle" id="fileNameDisplay" style="text-align:center; margin-top:5px;"></p>
+                        <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+                        <p class="card-subtitle" id="fileNameDisplay" style="text-align:center; margin-top:0; margin-bottom: 8px; min-height: 1.2em;"></p>
                         <div class="image-preview-container">
                             <img id="uploadedImageDisplay" src="#" alt="Aperçu de l'image">
                             <canvas id="overlayCanvas"></canvas>
@@ -391,7 +385,6 @@
                 </div>
             </div>
 
-            <!-- Actions pour Desktop (affichées via media query) -->
             <div class="desktop-actions-container">
                 <button id="predictBtnDesktop" class="action-button" disabled>Lancer Analyse</button>
                 <button id="describeLlmBtnDesktop" class="action-button secondary" disabled>Décrire avec LLM</button>
@@ -411,10 +404,11 @@
         const modelStatus = document.getElementById('modelStatus');
         
         const imageUploadInput = document.getElementById('imageUpload');
-        const imageUploadLabel = document.querySelector('.file-input-label'); // Le label qui fait office de bouton
+        const imageUploadLabel = document.querySelector('.file-input-label');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const uploadedImageDisplay = document.getElementById('uploadedImageDisplay');
         const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const imagePreviewContainer = document.querySelector('.image-preview-container'); // Ajouté
         const overlayCanvas = document.getElementById('overlayCanvas');
         const ctx = overlayCanvas.getContext('2d');
 
@@ -430,7 +424,6 @@
         const sahiOverlapHeightInput = document.getElementById('sahiOverlapHeight');
         const sahiOverlapWidthInput = document.getElementById('sahiOverlapWidth');
 
-        // Boutons d'action (mobile et desktop)
         const predictBtnMobile = document.getElementById('predictBtn');
         const describeLlmBtnMobile = document.getElementById('describeLlmBtn');
         const predictBtnDesktop = document.getElementById('predictBtnDesktop');
@@ -444,11 +437,10 @@
         let currentImageFile = null;
         let originalImageWidth = 0;
         let originalImageHeight = 0;
-        let imageDisplayWidth = 0;
-        let imageDisplayHeight = 0;
+        // let imageDisplayWidth = 0; // Ces valeurs seront calculées dans adjustCanvasAndDraw
+        // let imageDisplayHeight = 0;
         let lastDrawnBoxes = [];
 
-        // --- Fonctions Utilitaires ---
         function logMessage(message, type = 'INFO') {
             const timestamp = new Date().toLocaleTimeString();
             const newLogEntry = `[${timestamp} ${type}] ${message}\n`;
@@ -459,33 +451,29 @@
         function updateActionButtonsState() {
             const modelLoaded = modelStatus.textContent.startsWith('Modèle chargé:');
             const imageSelected = !!currentImageFile;
-
             const canPredict = modelLoaded && imageSelected;
-            const canDescribe = imageSelected; // Décrire ne dépend que de l'image
+            const canDescribe = imageSelected;
 
-            predictBtnMobile.disabled = !canPredict;
-            predictBtnDesktop.disabled = !canPredict;
-            
-            describeLlmBtnMobile.disabled = !canDescribe;
-            describeLlmBtnDesktop.disabled = !canDescribe;
+            [predictBtnMobile, predictBtnDesktop].forEach(btn => btn.disabled = !canPredict);
+            [describeLlmBtnMobile, describeLlmBtnDesktop].forEach(btn => btn.disabled = !canDescribe);
         }
 
-        // --- Initialisation & Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             fetchModels();
-            logMessage("Interface de type application initialisée. API: " + API_BASE_URL, "SYSTEM");
-            if (API_BASE_URL.includes("xxxxxxx")) {
-                 logMessage("N'OUBLIEZ PAS DE METTRE À JOUR API_BASE_URL avec votre URL ngrok !", "IMPORTANT_WARNING");
+            logMessage("Interface initialisée. API: " + API_BASE_URL, "SYSTEM");
+            if (API_BASE_URL.includes("ngrok-free.app") && API_BASE_URL.includes("xxxxxxx")) { // Plus générique
+                 logMessage("ASSUREZ-VOUS DE METTRE À JOUR API_BASE_URL avec votre URL ngrok !", "IMPORTANT_WARNING");
+            } else if (API_BASE_URL === 'https://cf57-193-55-66-31.ngrok-free.app') {
+                 logMessage("RAPPEL: L'URL API est une valeur d'exemple. Mettez à jour si c'est votre ancienne URL.", "WARNING");
             }
-            updateActionButtonsState(); // État initial des boutons
+            updateActionButtonsState();
 
-            // Clic sur le label pour déclencher l'input file caché
             if(imageUploadLabel) {
                 imageUploadLabel.addEventListener('click', () => imageUploadInput.click());
             }
         });
 
-        async function fetchModels() {
+        async function fetchModels() { /* ... (Identique à votre code) ... */
             logMessage('Chargement des modèles...');
             try {
                 const response = await fetch(`${API_BASE_URL}/models`, { headers: {'ngrok-skip-browser-warning': 'true'} });
@@ -500,7 +488,7 @@
             }
         }
 
-        loadModelBtn.addEventListener('click', async () => {
+        loadModelBtn.addEventListener('click', async () => { /* ... (Identique à votre code) ... */
             const modelName = modelSelect.value;
             if (!modelName) { logMessage('Sélectionnez un modèle.', 'WARNING'); return; }
             
@@ -526,46 +514,71 @@
                 updateActionButtonsState();
             }
         });
-
+        
         imageUploadInput.addEventListener('change', (event) => {
             currentImageFile = event.target.files[0];
             if (currentImageFile) {
                 fileNameDisplay.textContent = currentImageFile.name;
                 imagePlaceholder.style.display = 'none';
-                uploadedImageDisplay.style.display = 'block';
+                // Ne pas afficher uploadedImageDisplay ou overlayCanvas ici, adjustCanvasAndDraw s'en chargera
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     uploadedImageDisplay.src = e.target.result;
-                    uploadedImageDisplay.onload = () => { // Important d'attendre que l'image soit dans le DOM et dimensions connues
-                        originalImageWidth = uploadedImageDisplay.naturalWidth;
-                        originalImageHeight = uploadedImageDisplay.naturalHeight;
-                        adjustCanvasAndDraw();
-                        lastDrawnBoxes = []; // Clear previous boxes
-                        logMessage(`Image "${currentImageFile.name}" chargée (${originalImageWidth}x${originalImageHeight}).`, 'INFO');
-                    }
+                    // La magie opère dans uploadedImageDisplay.onload
                 }
                 reader.readAsDataURL(currentImageFile);
+
+                // Mettre cet écouteur ici garantit qu'il est frais pour chaque nouvelle image
+                uploadedImageDisplay.onload = () => {
+                    originalImageWidth = uploadedImageDisplay.naturalWidth;
+                    originalImageHeight = uploadedImageDisplay.naturalHeight;
+                    
+                    // Afficher l'image et le canvas maintenant qu'on a les dimensions
+                    uploadedImageDisplay.style.display = 'block';
+                    overlayCanvas.style.display = 'block';
+
+                    adjustCanvasAndDraw(); // Calcule tailles et positions, puis dessine
+                    lastDrawnBoxes = []; // Clear previous boxes for a new image
+                    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Explicitement
+                    logMessage(`Image "${currentImageFile.name}" chargée (${originalImageWidth}x${originalImageHeight}).`, 'INFO');
+                };
+                uploadedImageDisplay.onerror = () => {
+                    logMessage("Erreur: Impossible de charger l'aperçu de l'image.", "ERROR");
+                    resetImagePreview();
+                };
+
             } else {
-                fileNameDisplay.textContent = "";
-                uploadedImageDisplay.style.display = 'none';
-                imagePlaceholder.style.display = 'block';
-                ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-                lastDrawnBoxes = [];
+                resetImagePreview();
             }
             updateActionButtonsState();
         });
 
-        useSahiCheckbox.addEventListener('change', () => {
+        function resetImagePreview() {
+            fileNameDisplay.textContent = "";
+            uploadedImageDisplay.style.display = 'none';
+            overlayCanvas.style.display = 'none';
+            imagePlaceholder.style.display = 'block';
+            currentImageFile = null; // Important
+            originalImageWidth = 0;
+            originalImageHeight = 0;
+            lastDrawnBoxes = [];
+            if (ctx && overlayCanvas) { // S'assurer qu'ils existent
+                 ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            }
+        }
+
+
+        useSahiCheckbox.addEventListener('change', () => { /* ... (Identique à votre code) ... */
             sahiOptionsDiv.style.display = useSahiCheckbox.checked ? 'block' : 'none';
         });
 
-        // Fonction générique pour la prédiction, appelée par les deux boutons
-        async function handlePrediction() {
-            if (!currentImageFile || !modelStatus.textContent.startsWith('Modèle chargé:')) {
+        async function handlePrediction() { /* ... (Identique à votre code, juste pour la complétude) ... */
+             if (!currentImageFile || !modelStatus.textContent.startsWith('Modèle chargé:')) {
                 logMessage('Chargez modèle et image.', 'WARNING'); return;
             }
             logMessage('Analyse en cours...', 'INFO');
-            predictBtnMobile.disabled = true; predictBtnDesktop.disabled = true;
+            [predictBtnMobile, predictBtnDesktop].forEach(btn => btn.disabled = true);
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             lastDrawnBoxes = [];
 
@@ -590,24 +603,23 @@
                 if (!response.ok) throw new Error(result.detail || `Serveur: ${response.status}`);
                 logMessage(`Analyse: ${result.boxes.length} boîtes trouvées.`, 'SUCCESS');
                 lastDrawnBoxes = result.boxes;
-                drawBoundingBoxes(lastDrawnBoxes);
+                drawBoundingBoxes(lastDrawnBoxes); // Va utiliser les dimensions d'affichage calculées
             } catch (error) {
                 logMessage(`Erreur prédiction: ${error.message}`, 'ERROR');
             } finally {
-                updateActionButtonsState(); // Réactive les boutons en fonction de l'état global
+                updateActionButtonsState(); 
             }
         }
         predictBtnMobile.addEventListener('click', handlePrediction);
         predictBtnDesktop.addEventListener('click', handlePrediction);
 
-        // Fonction générique pour la description LLM
-        async function handleLlmDescription() {
+        async function handleLlmDescription() { /* ... (Identique à votre code, juste pour la complétude) ... */
             if (!currentImageFile) {
                  logMessage('Téléchargez une image pour la description.', 'WARNING'); return;
             }
             logMessage('Description LLM en cours...', 'INFO');
             llmDescriptionOutput.textContent = 'En cours...';
-            describeLlmBtnMobile.disabled = true; describeLlmBtnDesktop.disabled = true;
+            [describeLlmBtnMobile, describeLlmBtnDesktop].forEach(btn => btn.disabled = true);
 
             try {
                 const reader = new FileReader();
@@ -635,53 +647,73 @@
         describeLlmBtnMobile.addEventListener('click', handleLlmDescription);
         describeLlmBtnDesktop.addEventListener('click', handleLlmDescription);
 
-
         // --- Canvas & Dessin ---
+        // REVISED adjustCanvasAndDraw
         function adjustCanvasAndDraw() {
             if (!uploadedImageDisplay.complete || uploadedImageDisplay.naturalWidth === 0 || !currentImageFile) {
-                // Image pas encore chargée ou dimensions non valides
-                requestAnimationFrame(adjustCanvasAndDraw); // Réessayer au prochain frame
+                // Si l'image n'est pas prête (ex: src juste défini mais pas encore chargé par le navigateur)
+                // ou si currentImageFile est null (ex: après un reset)
+                // On ne fait rien ou on cache, resetImagePreview gère le cas null.
+                if (currentImageFile) {
+                    requestAnimationFrame(adjustCanvasAndDraw); // Réessayer au prochain frame si une image est attendue
+                }
                 return;
             }
             
-            const previewContainer = document.querySelector('.image-preview-container');
-            const containerWidth = previewContainer.clientWidth;
-            const containerHeight = previewContainer.clientHeight;
+            const containerWidth = imagePreviewContainer.clientWidth;
+            const containerHeight = imagePreviewContainer.clientHeight;
 
             const imgAspectRatio = originalImageWidth / originalImageHeight;
-            const containerAspectRatio = containerWidth / containerHeight;
+            
+            let displayWidth, displayHeight;
 
-            if (imgAspectRatio > containerAspectRatio) { // Image plus large que le conteneur
-                imageDisplayWidth = containerWidth;
-                imageDisplayHeight = containerWidth / imgAspectRatio;
-            } else { // Image plus haute ou de même ratio
-                imageDisplayHeight = containerHeight;
-                imageDisplayWidth = containerHeight * imgAspectRatio;
+            // Calculer les dimensions d'affichage pour s'adapter au conteneur tout en gardant le ratio
+            if (containerWidth / containerHeight > imgAspectRatio) {
+                // Le conteneur est plus large (ou moins haut) que l'image
+                displayHeight = containerHeight;
+                displayWidth = displayHeight * imgAspectRatio;
+            } else {
+                // Le conteneur est plus haut (ou moins large) que l'image
+                displayWidth = containerWidth;
+                displayHeight = displayWidth / imgAspectRatio;
             }
             
-            uploadedImageDisplay.style.width = `${imageDisplayWidth}px`;
-            uploadedImageDisplay.style.height = `${imageDisplayHeight}px`;
+            // Appliquer les dimensions à l'image
+            uploadedImageDisplay.style.width = `${displayWidth}px`;
+            uploadedImageDisplay.style.height = `${displayHeight}px`;
+            
+            // Centrer l'image dans son conteneur (qui est flex et center)
+            // n'est plus nécessaire avec la logique flex du parent si l'image
+            // elle-même est un block. Mais si on la positionne en absolute:
+            uploadedImageDisplay.style.position = 'absolute';
+            uploadedImageDisplay.style.top = `${(containerHeight - displayHeight) / 2}px`;
+            uploadedImageDisplay.style.left = `${(containerWidth - displayWidth) / 2}px`;
 
-            overlayCanvas.width = imageDisplayWidth;
-            overlayCanvas.height = imageDisplayHeight;
+            // Ajuster le canvas pour qu'il corresponde exactement à l'image affichée
+            overlayCanvas.width = displayWidth;
+            overlayCanvas.height = displayHeight;
+            overlayCanvas.style.top = uploadedImageDisplay.style.top; // Aligner avec l'image
+            overlayCanvas.style.left = uploadedImageDisplay.style.left; // Aligner avec l'image
             
-            // Centrer le canvas sur l'image si l'image est plus petite que le conteneur du canvas
-            overlayCanvas.style.top = `${(containerHeight - imageDisplayHeight) / 2}px`;
-            overlayCanvas.style.left = `${(containerWidth - imageDisplayWidth) / 2}px`;
-            
-            drawBoundingBoxes(lastDrawnBoxes);
+            // S'assurer qu'ils sont visibles (au cas où ils auraient été cachés)
+            uploadedImageDisplay.style.display = 'block';
+            overlayCanvas.style.display = 'block';
+
+            drawBoundingBoxes(lastDrawnBoxes); // Redessiner avec les nouvelles dimensions
         }
 
+
         function drawBoundingBoxes(boxes) {
-            if (!boxes) return;
+            if (!boxes || !overlayCanvas.width || !overlayCanvas.height) return; // S'assurer que le canvas a des dimensions
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             if (boxes.length === 0) return;
 
-            ctx.strokeStyle = 'rgba(255, 59, 48, 0.9)'; // Rouge iOS-like avec un peu de transparence
-            ctx.lineWidth = Math.max(1.5, Math.min(imageDisplayWidth, imageDisplayHeight) / 250);
+            ctx.strokeStyle = 'rgba(255, 59, 48, 0.9)';
+            // Utiliser les dimensions actuelles du canvas pour lineWidth, pas imageDisplayWidth/Height globaux
+            ctx.lineWidth = Math.max(1.5, Math.min(overlayCanvas.width, overlayCanvas.height) / 250);
 
-            const scaleX = imageDisplayWidth / originalImageWidth;
-            const scaleY = imageDisplayHeight / originalImageHeight;
+            const scaleX = overlayCanvas.width / originalImageWidth;
+            const scaleY = overlayCanvas.height / originalImageHeight;
 
             boxes.forEach(box => {
                 ctx.strokeRect(box.x1 * scaleX, box.y1 * scaleY, (box.x2 - box.x1) * scaleX, (box.y2 - box.y1) * scaleY);
@@ -689,7 +721,7 @@
         }
         
         window.addEventListener('resize', () => {
-            if (currentImageFile) {
+            if (currentImageFile && uploadedImageDisplay.style.display === 'block') { // Seulement si une image est affichée
                 adjustCanvasAndDraw();
             }
         });
