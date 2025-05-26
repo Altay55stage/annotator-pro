@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Annotator Web</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .controls-main, .controls-params, .actions {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .control-group, fieldset {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            flex: 1;
+            min-width: 280px; /* Pour que les groupes ne deviennent pas trop étroits */
+        }
+        fieldset legend {
+            font-weight: bold;
+            color: #555;
+        }
+        fieldset > div {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], select, input[type="file"] {
+            width: calc(100% - 22px); /* Ajuster pour padding/border */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="checkbox"] {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #modelStatus {
+            margin-left: 10px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .output-area {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Permet le passage à la ligne sur petits écrans */
+        }
+
+        .image-display {
+            position: relative; /* Nécessaire pour superposer le canvas */
+            flex: 2; /* Prend plus de place */
+            min-width: 300px; /* Taille minimale pour l'affichage de l'image */
+            border: 1px solid #ddd;
+            display: flex; /* Pour centrer l'image si elle est plus petite */
+            justify-content: center; /* Centrage horizontal */
+            align-items: center; /* Centrage vertical */
+            background-color: #e9e9e9; /* Fond pour voir les limites */
+        }
+
+        #uploadedImageDisplay {
+            max-width: 100%;
+            max-height: 600px; /* Limite la hauteur pour ne pas prendre tout l'écran */
+            display: block; /* Évite l'espace sous l'image */
+            object-fit: contain; /* S'assure que l'image entière est visible */
+        }
+
+        #overlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Permet les clics sur l'image en dessous si besoin */
+        }
+
+        .log-area {
+            flex: 1; /* Prend moins de place que l'image */
+            min-width: 250px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-height: 600px; /* Hauteur max pour les logs */
+            overflow-y: auto; /* Scroll si le contenu dépasse */
+        }
+        .log-area h3 {
+            margin-top: 0;
+        }
+
+        pre {
+            white-space: pre-wrap; /* Permet le retour à la ligne automatique */
+            word-wrap: break-word; /* Coupe les mots longs */
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            max-height: 200px; /* Limite hauteur des blocs pre */
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YOLO Annotator Pro (Web)</h1>
+
+        <div class="controls-main">
+            <div class="control-group">
+                <label for="modelSelect">Modèle YOLO:</label>
+                <select id="modelSelect"></select>
+                <button id="loadModelBtn">Charger Modèle</button>
+                <span id="modelStatus">Aucun modèle chargé</span>
+            </div>
+
+            <div class="control-group">
+                <label for="imageUpload">Télécharger Image:</label>
+                <input type="file" id="imageUpload" accept="image/*">
+            </div>
+        </div>
+
+        <div class="controls-params">
+            <fieldset>
+                <legend>Paramètres YOLO Standard</legend>
+                <div>
+                    <label for="confidence">Confiance (0.01-1.0):</label>
+                    <input type="number" id="confidence" value="0.3" step="0.01" min="0.01" max="1.0">
+                </div>
+                <div>
+                    <label for="imgSize">Taille Image (inférence):</label>
+                    <input type="number" id="imgSize" value="640" step="32" min="32">
+                </div>
+                <div>
+                    <label for="nmsIou">NMS IoU:</label>
+                    <input type="number" id="nmsIou" value="0.45" step="0.01" min="0.01" max="1.0">
+                </div>
+                 <div>
+                    <label for="device">Device:</label>
+                    <select id="device">
+                        <option value="cuda">CUDA (si disponible)</option>
+                        <option value="cpu">CPU</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Paramètres SAHI (Optionnel)</legend>
+                <div>
+                    <input type="checkbox" id="useSahi">
+                    <label for="useSahi" style="display: inline-block; margin-bottom:0; font-weight:normal;">Utiliser SAHI</label>
+                </div>
+                <div class="sahi-options" style="display:none;">
+                    <div>
+                        <label for="sahiSliceHeight">Slice Height:</label>
+                        <input type="number" id="sahiSliceHeight" value="512">
+                    </div>
+                    <div>
+                        <label for="sahiSliceWidth">Slice Width:</label>
+                        <input type="number" id="sahiSliceWidth" value="512">
+                    </div>
+                    <div>
+                        <label for="sahiOverlapHeight">Overlap Height Ratio:</label>
+                        <input type="number" id="sahiOverlapHeight" value="0.2" step="0.01" min="0" max="0.99">
+                    </div>
+                    <div>
+                        <label for="sahiOverlapWidth">Overlap Width Ratio:</label>
+                        <input type="number" id="sahiOverlapWidth" value="0.2" step="0.01" min="0" max="0.99">
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        
+        <div class="actions">
+            <button id="predictBtn" disabled>Lancer Analyse</button>
+            <button id="describeLlmBtn" disabled>Décrire avec LLM (Externe)</button>
+        </div>
+
+        <div class="output-area">
+            <div class="image-display">
+                <img id="uploadedImageDisplay" src="#" alt="Image téléchargée" style="display:none;">
+                <canvas id="overlayCanvas"></canvas>
+            </div>
+            <div class="log-area">
+                <h3>Logs / Status:</h3>
+                <pre id="logOutput">Prêt.</pre>
+                <h3>Description LLM:</h3>
+                <pre id="llmDescriptionOutput"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE_URL = 'https://cf57-193-55-66-31.ngrok-free.app'; // <--- MODIFIEZ CECI SI NÉCESSAIRE
+
+            const modelSelect = document.getElementById('modelSelect');
+            const loadModelBtn = document.getElementById('loadModelBtn');
+            const modelStatus = document.getElementById('modelStatus');
+            const imageUpload = document.getElementById('imageUpload');
+            const uploadedImageDisplay = document.getElementById('uploadedImageDisplay');
+            const overlayCanvas = document.getElementById('overlayCanvas');
+            const ctx = overlayCanvas.getContext('2d');
+
+            const confidenceInput = document.getElementById('confidence');
+            const imgSizeInput = document.getElementById('imgSize');
+            const nmsIouInput = document.getElementById('nmsIou');
+            const deviceSelect = document.getElementById('device');
+
+            const useSahiCheckbox = document.getElementById('useSahi');
+            const sahiOptionsDiv = document.querySelector('.sahi-options');
+            const sahiSliceHeightInput = document.getElementById('sahiSliceHeight');
+            const sahiSliceWidthInput = document.getElementById('sahiSliceWidth');
+            const sahiOverlapHeightInput = document.getElementById('sahiOverlapHeight');
+            const sahiOverlapWidthInput = document.getElementById('sahiOverlapWidth');
+
+            const predictBtn = document.getElementById('predictBtn');
+            const describeLlmBtn = document.getElementById('describeLlmBtn');
+            const logOutput = document.getElementById('logOutput');
+            const llmDescriptionOutput = document.getElementById('llmDescriptionOutput');
+
+            let currentImageFile = null;
+            let originalImageWidth = 0;
+            let originalImageHeight = 0;
+            let imageDisplayWidth = 0;
+            let imageDisplayHeight = 0;
+            let lastDrawnBoxes = []; // Pour redessiner lors du redimensionnement
+
+            function logMessage(message, type = 'INFO') {
+                const timestamp = new Date().toLocaleTimeString();
+                const currentLog = logOutput.textContent;
+                const newLogEntry = `[${timestamp} ${type}] ${message}\n`;
+                logOutput.textContent = newLogEntry + (currentLog.length > 5000 ? currentLog.substring(0, 5000) + "..." : currentLog); 
+                console.log(`[${type}] ${message}`);
+            }
+
+            async function fetchModels() {
+                try {
+                    logMessage('Chargement de la liste des modèles...');
+                    const response = await fetch(`${API_BASE_URL}/models`, {
+                        headers: {
+                            'ngrok-skip-browser-warning': 'true' // Ajout de l'en-tête
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text(); // Lire comme texte pour voir ce que Ngrok a renvoyé
+                        logMessage(`Erreur serveur (${response.status}) lors du chargement des modèles: ${errorText.substring(0,200)}`, 'ERROR');
+                        throw new Error(`Erreur serveur (${response.status})`);
+                    }
+                    const models = await response.json();
+                    modelSelect.innerHTML = models.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+                    if (models.length > 0) {
+                        logMessage(`Liste des modèles chargée (${models.length} trouvés). Sélectionnez et chargez un modèle.`, 'SUCCESS');
+                    } else {
+                        logMessage('Aucun modèle .pt trouvé directement dans le dossier des modèles sur le serveur.', 'WARNING');
+                        modelStatus.textContent = "Aucun modèle sur le serveur.";
+                    }
+                } catch (error) {
+                    logMessage(`Erreur lors du chargement des modèles: ${error.message}`, 'ERROR');
+                    modelStatus.textContent = "Erreur chargement modèles.";
+                }
+            }
+
+            loadModelBtn.addEventListener('click', async () => {
+                const selectedModelName = modelSelect.value;
+                if (!selectedModelName) {
+                    logMessage('Veuillez sélectionner un modèle.', 'WARNING');
+                    return;
+                }
+                logMessage(`Chargement du modèle: ${selectedModelName}...`);
+                modelStatus.textContent = `Chargement de ${selectedModelName}...`;
+                loadModelBtn.disabled = true;
+                predictBtn.disabled = true;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/load_model`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': 'true' // Ajout de l'en-tête
+                        },
+                        body: JSON.stringify({ model_name: selectedModelName })
+                    });
+                    const result = await response.json();
+                    if (!response.ok) {
+                         const errorText = result.detail || await response.text();
+                        throw new Error(errorText || `Erreur serveur (${response.status})`);
+                    }
+                    modelStatus.textContent = `Modèle chargé: ${selectedModelName}`;
+                    logMessage(`Modèle ${selectedModelName} chargé avec succès.`, 'SUCCESS');
+                    if (currentImageFile) predictBtn.disabled = false;
+                } catch (error) {
+                    modelStatus.textContent = "Erreur chargement modèle.";
+                    logMessage(`Erreur lors du chargement du modèle: ${error.message}`, 'ERROR');
+                } finally {
+                    loadModelBtn.disabled = false;
+                }
+            });
+
+            imageUpload.addEventListener('change', (event) => {
+                currentImageFile = event.target.files[0];
+                if (currentImageFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImageDisplay.src = e.target.result;
+                        uploadedImageDisplay.style.display = 'block';
+                        
+                        uploadedImageDisplay.onload = () => {
+                            originalImageWidth = uploadedImageDisplay.naturalWidth;
+                            originalImageHeight = uploadedImageDisplay.naturalHeight;
+                            
+                            adjustCanvasAndDraw(); // Appel centralisé
+                            
+                            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); 
+                            lastDrawnBoxes = [];
+                            logMessage(`Image "${currentImageFile.name}" chargée. Dimensions originales: ${originalImageWidth}x${originalImageHeight}. Affichée: ${imageDisplayWidth.toFixed(0)}x${imageDisplayHeight.toFixed(0)}`, 'INFO');
+                            if (modelStatus.textContent.startsWith('Modèle chargé:')) {
+                                predictBtn.disabled = false;
+                            }
+                            describeLlmBtn.disabled = false;
+                        }
+                    }
+                    reader.readAsDataURL(currentImageFile);
+                } else {
+                    uploadedImageDisplay.style.display = 'none';
+                    predictBtn.disabled = true;
+                    describeLlmBtn.disabled = true;
+                    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                    lastDrawnBoxes = [];
+                }
+            });
+
+            useSahiCheckbox.addEventListener('change', () => {
+                sahiOptionsDiv.style.display = useSahiCheckbox.checked ? 'block' : 'none';
+            });
+
+            predictBtn.addEventListener('click', async () => {
+                if (!currentImageFile || !modelStatus.textContent.startsWith('Modèle chargé:')) {
+                    logMessage('Veuillez charger un modèle et une image.', 'WARNING');
+                    return;
+                }
+
+                logMessage('Lancement de la prédiction...', 'INFO');
+                predictBtn.disabled = true;
+                ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); 
+                lastDrawnBoxes = [];
+
+                const params = {
+                    confidence: parseFloat(confidenceInput.value),
+                    img_size: parseInt(imgSizeInput.value),
+                    nms_iou: parseFloat(nmsIouInput.value),
+                    device: deviceSelect.value,
+                    use_sahi: useSahiCheckbox.checked,
+                    sahi_slice_height: parseInt(sahiSliceHeightInput.value),
+                    sahi_slice_width: parseInt(sahiSliceWidthInput.value),
+                    sahi_overlap_height_ratio: parseFloat(sahiOverlapHeightInput.value),
+                    sahi_overlap_width_ratio: parseFloat(sahiOverlapWidthInput.value),
+                };
+                
+                const queryParams = new URLSearchParams(params); // Construit les query params à partir de l'objet
+                const finalPredictUrl = `${API_BASE_URL}/predict?${queryParams.toString()}`;
+                
+                const fileDataOnly = new FormData();
+                fileDataOnly.append('file', currentImageFile);
+
+                try {
+                    const response = await fetch(finalPredictUrl, {
+                        method: 'POST',
+                        body: fileDataOnly,
+                        headers: {
+                            'ngrok-skip-browser-warning': 'true' // Ajout de l'en-tête
+                        }
+                        // Pas de 'Content-Type' header, le navigateur le mettra pour FormData
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        const errorText = result.detail || await response.text();
+                        throw new Error(errorText || `Erreur serveur (${response.status})`);
+                    }
+
+                    logMessage(`Prédiction terminée. ${result.boxes.length} boîtes trouvées.`, 'SUCCESS');
+                    lastDrawnBoxes = result.boxes;
+                    drawBoundingBoxes(lastDrawnBoxes);
+
+                } catch (error) {
+                    logMessage(`Erreur lors de la prédiction: ${error.message}`, 'ERROR');
+                } finally {
+                    predictBtn.disabled = false;
+                }
+            });
+            
+            function adjustCanvasAndDraw() {
+                if (uploadedImageDisplay.style.display !== 'block' || !currentImageFile) return;
+
+                const displayRect = uploadedImageDisplay.getBoundingClientRect();
+                const containerRect = uploadedImageDisplay.parentElement.getBoundingClientRect();
+
+                imageDisplayWidth = displayRect.width;
+                imageDisplayHeight = displayRect.height;
+                
+                overlayCanvas.width = imageDisplayWidth;
+                overlayCanvas.height = imageDisplayHeight;
+
+                // Positionner le canvas par rapport à son parent (.image-display)
+                // et non par rapport à l'image elle-même si l'image est centrée.
+                // Le parent (.image-display) a `display: flex; justify-content: center; align-items: center;`
+                // donc on calcule le décalage de l'image à l'intérieur de son conteneur.
+                const offsetX = (containerRect.width - imageDisplayWidth) / 2;
+                const offsetY = (containerRect.height - imageDisplayHeight) / 2;
+
+                overlayCanvas.style.top = offsetY + 'px';
+                overlayCanvas.style.left = offsetX + 'px';
+                
+                drawBoundingBoxes(lastDrawnBoxes); // Redessiner les boîtes existantes
+            }
+
+            function drawBoundingBoxes(boxes) {
+                if (!boxes) return;
+                ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+                if (boxes.length === 0) return;
+
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = Math.max(1, Math.min(imageDisplayWidth, imageDisplayHeight) / 200); // Dynamic line width
+
+                const scaleX = imageDisplayWidth / originalImageWidth;
+                const scaleY = imageDisplayHeight / originalImageHeight;
+
+                boxes.forEach(box => {
+                    const x1 = box.x1 * scaleX;
+                    const y1 = box.y1 * scaleY;
+                    const width = (box.x2 - box.x1) * scaleX;
+                    const height = (box.y2 - box.y1) * scaleY;
+                    ctx.strokeRect(x1, y1, width, height);
+                });
+            }
+            
+            window.addEventListener('resize', () => {
+                 if (currentImageFile) { // Seulement si une image est chargée
+                    adjustCanvasAndDraw();
+                 }
+            });
+
+            describeLlmBtn.addEventListener('click', async () => {
+                if (!currentImageFile) {
+                    logMessage('Veuillez d\'abord télécharger une image.', 'WARNING');
+                    return;
+                }
+                logMessage('Demande de description LLM...', 'INFO');
+                llmDescriptionOutput.textContent = 'En cours...';
+                describeLlmBtn.disabled = true;
+
+                try {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(currentImageFile);
+                    reader.onloadend = async () => {
+                        const base64Image = reader.result.split(',')[1]; 
+                        
+                        const response = await fetch(`${API_BASE_URL}/describe_llm`, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'ngrok-skip-browser-warning': 'true' // Ajout de l'en-tête
+                            },
+                            body: JSON.stringify({ image_base64: base64Image, prompt: "Décris cette image." })
+                        });
+                        
+                        const result = await response.json();
+                        if (!response.ok) {
+                            const errorText = result.detail || await response.text();
+                            throw new Error(errorText || `Erreur LLM (${response.status})`);
+                        }
+                        llmDescriptionOutput.textContent = result.description;
+                        logMessage('Description LLM reçue.', 'SUCCESS');
+                    };
+                    reader.onerror = (error) => {
+                        logMessage('Erreur de lecture du fichier pour LLM.', 'ERROR');
+                        llmDescriptionOutput.textContent = 'Erreur de lecture du fichier.';
+                        // throw new Error('Erreur de lecture du fichier pour LLM.'); // Ne pas throw ici, déjà dans un callback
+                    };
+
+                } catch (error) {
+                    logMessage(`Erreur LLM: ${error.message}`, 'ERROR');
+                    llmDescriptionOutput.textContent = `Erreur: ${error.message}`;
+                } finally {
+                    describeLlmBtn.disabled = false;
+                }
+            });
+
+            fetchModels();
+            logMessage("Interface initialisée. L'URL du serveur API est: " + API_BASE_URL, "SYSTEM");
+            if (API_BASE_URL.includes("ngrok-free.app") && API_BASE_URL.includes("xxxxxxx")) { // Plus générique
+                 logMessage("ASSUREZ-VOUS DE METTRE À JOUR API_BASE_URL avec votre propre URL ngrok pour le serveur FastAPI !", "IMPORTANT_WARNING");
+            } else if (API_BASE_URL === 'https://cf57-193-55-66-31.ngrok-free.app') {
+                 logMessage("RAPPEL: L'URL API_BASE_URL est une valeur d'exemple. Mettez à jour si c'est votre ancienne URL.", "WARNING");
+            }
+        });
+    </script>
+</body>
+</html>
