@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>YOLO Annotator</title>
+    <title>YOLO Annotator (Mobile First)</title>
     <style>
-        /* ... (Styles :root, *, html, body, .app-container, .app-header, .app-content, .card, .card-title, .card-subtitle, label, .file-input-label, input[type=text/number/select], .checkbox-container, #modelStatus - IDENTIQUES) ... */
         :root {
-            --app-bg-color: #f0f2f5;
+            --app-bg-color: #f0f2f5; 
             --card-bg-color: #ffffff;
-            --primary-color: #007aff;
+            --primary-color: #007aff; 
             --primary-text-color: #ffffff;
-            --secondary-text-color: #8e8e93;
-            --text-color: #1c1c1e;
+            --secondary-text-color: #8e8e93; 
+            --text-color: #1c1c1e; 
             --border-color: #c6c6c8;
             --header-height: 50px;
             --bottom-action-bar-height: 60px;
@@ -82,12 +81,7 @@
             margin-bottom: 15px;
             color: var(--text-color);
         }
-        .card-subtitle {
-            font-size: 0.9em;
-            color: var(--secondary-text-color);
-            margin-bottom: 10px;
-        }
-
+        
         label {
             display: block;
             margin-bottom: 8px;
@@ -95,8 +89,15 @@
             font-size: 0.95em;
             color: var(--text-color);
         }
-        .file-input-label {
-            display: block; 
+        
+        /* Input file stylisé via label */
+        .file-input-card-content { /* Conteneur pour le label et le nom du fichier */
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+        }
+        .file-input-label-styled {
+            display: block;
             width: 100%;
             padding: 12px;
             border: 1px dashed var(--primary-color);
@@ -105,9 +106,17 @@
             color: var(--primary-color);
             text-align: center;
             cursor: pointer;
-            margin-bottom: 5px; 
+            margin-bottom: 8px;
             font-weight: 500;
         }
+         #fileNameDisplay {
+            font-size: 0.85em;
+            color: var(--secondary-text-color);
+            min-height: 1.2em; /* Empêche le saut de layout */
+            text-align: center;
+            word-break: break-all;
+        }
+
 
         input[type="text"],
         input[type="number"],
@@ -141,48 +150,46 @@
             font-size: 0.9em;
             color: var(--secondary-text-color);
             text-align: center;
-            padding: 5px 0;
+            padding: 8px 0 0 0; /* Espace au-dessus */
+            min-height: 1.2em;
         }
-
+        
+        /* Image Preview Area - Inspiré de la "Version Simple" mais intégré dans la structure "app" */
         .image-preview-container {
+            position: relative; /* Pour le canvas en absolu */
             width: 100%;
-            min-height: 180px;
-            max-height: 45vh; 
-            background-color: #e9ecef;
-            border-radius: 8px;
-            display: flex; 
-            align-items: center;
+            min-height: 200px; /* Hauteur minimale pour le placeholder */
+            max-height: 60vh; /* Limite la hauteur sur mobile */
+            border: 1px solid var(--border-color);
+            display: flex; /* Pour centrer l'image/placeholder */
             justify-content: center;
-            margin-top: 10px; 
-            position: relative; 
-            overflow: hidden; 
+            align-items: center;
+            background-color: #e9ecef; /* Fond si l'image est plus petite ou pas chargée */
+            border-radius: 8px;
+            margin-top: 10px;
+            overflow: hidden; /* Important */
         }
 
         #uploadedImageDisplay {
-            /* display: none; -- initialement géré par JS, mais on peut forcer block si le parent est visible */
-            display: block; /* On le met visible, sa source déterminera s'il y a qqch à montrer */
-            position: absolute; /* Géré par JS pour centrage */
-            /* width et height seront définis par JS */
+            max-width: 100%;
+            max-height: 100%;
+            display: none; /* Caché initialement, affiché par JS comme dans la Version Simple */
             object-fit: contain; 
-            opacity: 0; /* Caché par opacité, rendu visible par JS une fois chargé */
-            transition: opacity 0.3s ease-in-out;
         }
 
         #overlayCanvas {
-            position: absolute; 
-            pointer-events: none;
-            display: block; /* Toujours block, mais son contenu le rendra "visible" */
-            opacity: 0; /* Caché par opacité, rendu visible par JS une fois image chargée */
-            transition: opacity 0.3s ease-in-out;
+            position: absolute;
+            /* top, left, width, height définis par JS */
+            pointer-events: none; 
         }
-        .image-placeholder-text {
+         #imagePlaceholderText { /* Renommé pour éviter confusion */
             color: var(--secondary-text-color);
             font-size: 0.9em;
             text-align: center;
-            /* display: block; -- géré par JS */
+            display: block; /* Affiché par défaut, caché par JS si image */
         }
 
-        /* ... (Styles .log-output-card, pre, .app-bottom-actions, .action-button, details, @media - IDENTIQUES) ... */
+
         .log-output-card .card-title {
             margin-bottom: 8px;
         }
@@ -193,7 +200,7 @@
             font-size: 0.8em;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-height: 150px;
+            max-height: 120px; /* Réduit pour mobile */
             overflow-y: auto;
             color: #495057;
         }
@@ -205,18 +212,21 @@
             right: 0;
             background-color: var(--card-bg-color);
             height: calc(var(--bottom-action-bar-height) + var(--safe-area-inset-bottom));
-            padding-bottom: var(--safe-area-inset-bottom);
+            padding-top: 10px; /* Espace au-dessus des boutons */
+            padding-bottom: calc(10px + var(--safe-area-inset-bottom)); /* Espace en dessous + encoche */
+            padding-left: 15px;
+            padding-right: 15px;
             display: flex;
-            align-items: center;
-            justify-content: space-around;
+            gap: 10px; /* Espace entre les boutons */
+            align-items: center; /* Centre verticalement les boutons */
             border-top: 1px solid #e0e0e0;
             box-shadow: 0 -1px 5px rgba(0,0,0,0.08);
             z-index: 100;
         }
 
-        .action-button {
+        .action-button { /* Style commun pour les boutons d'action */
             flex-grow: 1;
-            padding: 10px 5px;
+            padding: 10px 5px; /* Ajusté pour hauteur */
             background-color: var(--primary-color);
             color: var(--primary-text-color);
             border: none;
@@ -225,9 +235,8 @@
             font-weight: 500;
             text-align: center;
             cursor: pointer;
-            margin: 0 8px;
-            height: 40px;
-            line-height: 20px; 
+            height: 40px; 
+            line-height: 1.2; /* Pour mieux centrer le texte sur une ligne */
         }
         .action-button:disabled {
             background-color: #b0bec5;
@@ -238,6 +247,13 @@
             background-color: #e9ecef;
             color: var(--primary-color);
         }
+        /* Le bouton de chargement de modèle est maintenant stylé comme .action-button mais dans son card */
+        #loadModelBtnCard {
+            width:100%; 
+            margin-top:10px; 
+            /* margin-left:0; (pas besoin avec flex-grow:1 sur parent si besoin) */
+        }
+
 
         details {
             background-color: var(--card-bg-color);
@@ -269,17 +285,19 @@
                 max-width: 900px;
                 margin: var(--header-height) auto 0 auto;
                 padding: 20px;
-                padding-bottom: 20px;
+                padding-bottom: 20px; /* Reset car pas de barre d'action en bas */
             }
-            .app-bottom-actions { display: none; }
+            .app-bottom-actions { display: none; } /* Cacher la barre d'action du bas */
 
+            /* Afficher les boutons d'action dans le contenu principal sur desktop */
             .desktop-actions-container {
                 display: flex;
                 gap: 15px;
                 margin-top: 20px;
+                margin-bottom: 20px; /* Espace en bas */
             }
             .desktop-actions-container .action-button {
-                margin: 0;
+                margin: 0; 
             }
 
             .main-layout-desktop {
@@ -288,12 +306,13 @@
             }
             .main-layout-desktop > .column {
                 flex: 1;
+                min-width: 0; /* Important pour flexbox et contenu qui dépasse */
             }
-             .image-preview-container {
-                max-height: 500px; 
+            .image-preview-container {
+                max-height: 600px; 
                 min-height: 300px;
             }
-            pre { max-height: 200px; }
+            pre { max-height: 180px; }
         }
     </style>
 </head>
@@ -307,24 +326,26 @@
             <div class="main-layout-desktop">
                 <div class="column">
                     <section class="card">
-                        <h2 class="card-title">1. Configuration du Modèle</h2>
+                        <h2 class="card-title">1. Configuration</h2>
                         <label for="modelSelect">Modèle YOLO :</label>
                         <select id="modelSelect"></select>
-                        <button id="loadModelBtn" class="action-button" style="width:100%; margin-top:10px; margin-left:0;">Charger Modèle</button>
+                        <button id="loadModelBtnCard" class="action-button">Charger Modèle</button>
                         <div id="modelStatus">Aucun modèle chargé</div>
                     </section>
 
                     <section class="card">
-                        <h2 class="card-title">2. Image à Analyser</h2>
-                        <label for="imageUpload" class="file-input-label">
-                            Choisir une image
-                        </label>
-                        <input type="file" id="imageUpload" accept="image/*" style="display:none;">
-                        <p class="card-subtitle" id="fileNameDisplay" style="text-align:center; margin-top:0; margin-bottom: 8px; min-height: 1.2em;"></p>
+                        <h2 class="card-title">2. Image</h2>
+                        <div class="file-input-card-content">
+                            <label for="imageUpload" class="file-input-label-styled">
+                                Choisir une image
+                            </label>
+                            <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+                            <p id="fileNameDisplay"></p>
+                        </div>
                         <div class="image-preview-container">
-                            <img id="uploadedImageDisplay" src="#" alt="Aperçu de l'image">
+                            <img id="uploadedImageDisplay" src="#" alt="Aperçu">
                             <canvas id="overlayCanvas"></canvas>
-                            <span class="image-placeholder-text" id="imagePlaceholder">Aucune image sélectionnée</span>
+                            <span id="imagePlaceholderText">Aucune image sélectionnée</span>
                         </div>
                     </section>
                 </div>
@@ -387,34 +408,33 @@
                 </div>
             </div>
 
-            <div class="desktop-actions-container">
+            <!-- Actions pour Desktop (affichées via media query) -->
+            <div class="desktop-actions-container" style="display:none;"> <!-- Caché par défaut, affiché par JS si desktop -->
                 <button id="predictBtnDesktop" class="action-button" disabled>Lancer Analyse</button>
                 <button id="describeLlmBtnDesktop" class="action-button secondary" disabled>Décrire avec LLM</button>
             </div>
         </main>
 
-        <footer class="app-bottom-actions">
-            <button id="predictBtn" class="action-button" disabled>Analyser</button>
-            <button id="describeLlmBtn" class="action-button secondary" disabled>Décrire</button>
+        <footer class="app-bottom-actions"> <!-- Toujours visible, mais son contenu change via JS (ou on garde les deux paires de boutons) -->
+            <button id="predictBtnMobile" class="action-button" disabled>Analyser</button>
+            <button id="describeLlmBtnMobile" class="action-button secondary" disabled>Décrire</button>
         </footer>
     </div>
 
     <script>
         // --- Éléments DOM ---
         const modelSelect = document.getElementById('modelSelect');
-        const loadModelBtn = document.getElementById('loadModelBtn');
+        const loadModelBtnCard = document.getElementById('loadModelBtnCard'); // Bouton dans la carte
         const modelStatus = document.getElementById('modelStatus');
         
         const imageUploadInput = document.getElementById('imageUpload');
-        const imageUploadLabel = document.querySelector('.file-input-label');
+        const imageUploadLabelStyled = document.querySelector('.file-input-label-styled');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const uploadedImageDisplay = document.getElementById('uploadedImageDisplay');
-        const imagePlaceholder = document.getElementById('imagePlaceholder');
-        const imagePreviewContainer = document.querySelector('.image-preview-container');
+        const imagePlaceholderText = document.getElementById('imagePlaceholderText');
         const overlayCanvas = document.getElementById('overlayCanvas');
         const ctx = overlayCanvas.getContext('2d');
 
-        // ... (autres éléments DOM identiques)
         const confidenceInput = document.getElementById('confidence');
         const imgSizeInput = document.getElementById('imgSize');
         const nmsIouInput = document.getElementById('nmsIou');
@@ -427,43 +447,53 @@
         const sahiOverlapHeightInput = document.getElementById('sahiOverlapHeight');
         const sahiOverlapWidthInput = document.getElementById('sahiOverlapWidth');
 
-        const predictBtnMobile = document.getElementById('predictBtn');
-        const describeLlmBtnMobile = document.getElementById('describeLlmBtn');
+        // Boutons d'action (mobile et desktop)
+        const predictBtnMobile = document.getElementById('predictBtnMobile');
+        const describeLlmBtnMobile = document.getElementById('describeLlmBtnMobile');
         const predictBtnDesktop = document.getElementById('predictBtnDesktop');
         const describeLlmBtnDesktop = document.getElementById('describeLlmBtnDesktop');
+        const desktopActionsContainer = document.querySelector('.desktop-actions-container');
+        const mobileFooterActions = document.querySelector('.app-bottom-actions');
         
         const logOutput = document.getElementById('logOutput');
         const llmDescriptionOutput = document.getElementById('llmDescriptionOutput');
 
-        const API_BASE_URL = 'https://cf57-193-55-66-31.ngrok-free.app'; 
+        const API_BASE_URL = 'https://cf57-193-55-66-31.ngrok-free.app'; // <--- METTRE À JOUR
 
         let currentImageFile = null;
         let originalImageWidth = 0;
         let originalImageHeight = 0;
+        // Ces variables sont utilisées localement dans adjustCanvasAndDraw et drawBoundingBoxes
+        // let imageDisplayWidth = 0; 
+        // let imageDisplayHeight = 0;
         let lastDrawnBoxes = [];
 
-        function logMessage(message, type = 'INFO') { /* ... (Identique) ... */
+        // --- Fonctions Utilitaires ---
+        function logMessage(message, type = 'INFO') {
             const timestamp = new Date().toLocaleTimeString();
             const newLogEntry = `[${timestamp} ${type}] ${message}\n`;
             logOutput.textContent = newLogEntry + logOutput.textContent.substring(0, 5000);
-            if (type === 'ERROR' || type === 'DEBUG_MOBILE') { // Pour forcer l'affichage console
+             if (type === 'ERROR' || type === 'DEBUG_MOBILE') {
                  console.error(`[${type}] ${message}`);
             } else {
                  console.log(`[${type}] ${message}`);
             }
         }
-
-        function updateActionButtonsState() { /* ... (Identique) ... */
+        
+        function updateAllActionButtonsState() {
             const modelLoaded = modelStatus.textContent.startsWith('Modèle chargé:');
             const imageSelected = !!currentImageFile;
             const canPredict = modelLoaded && imageSelected;
             const canDescribe = imageSelected;
 
-            [predictBtnMobile, predictBtnDesktop].forEach(btn => btn.disabled = !canPredict);
-            [describeLlmBtnMobile, describeLlmBtnDesktop].forEach(btn => btn.disabled = !canDescribe);
+            predictBtnMobile.disabled = !canPredict;
+            predictBtnDesktop.disabled = !canPredict;
+            describeLlmBtnMobile.disabled = !canDescribe;
+            describeLlmBtnDesktop.disabled = !canDescribe;
         }
 
-        document.addEventListener('DOMContentLoaded', () => { /* ... (Identique) ... */
+        // --- Initialisation & Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
             fetchModels();
             logMessage("Interface initialisée. API: " + API_BASE_URL, "SYSTEM");
              if (API_BASE_URL.includes("ngrok-free.app") && API_BASE_URL.includes("xxxxxxx")) { 
@@ -471,167 +501,159 @@
             } else if (API_BASE_URL === 'https://cf57-193-55-66-31.ngrok-free.app') {
                  logMessage("RAPPEL: L'URL API est une valeur d'exemple. Mettez à jour si c'est votre ancienne URL.", "WARNING");
             }
-            updateActionButtonsState();
+            updateAllActionButtonsState(); 
 
-            if(imageUploadLabel) {
-                imageUploadLabel.addEventListener('click', () => imageUploadInput.click());
+            // Gestion affichage mobile/desktop des barres d'actions
+            const mediaQueryDesktop = window.matchMedia('(min-width: 768px)');
+            function handleDesktopChange(e) {
+                if (e.matches) { // Si desktop
+                    desktopActionsContainer.style.display = 'flex';
+                    mobileFooterActions.style.display = 'none';
+                } else { // Si mobile
+                    desktopActionsContainer.style.display = 'none';
+                    mobileFooterActions.style.display = 'flex';
+                }
             }
-            // Initial state of placeholder
-            imagePlaceholder.style.display = 'block';
-            uploadedImageDisplay.style.opacity = '0';
-            overlayCanvas.style.opacity = '0';
+            mediaQueryDesktop.addEventListener('change', handleDesktopChange);
+            handleDesktopChange(mediaQueryDesktop); // Appel initial
+
+
+            if(imageUploadLabelStyled) {
+                imageUploadLabelStyled.addEventListener('click', () => imageUploadInput.click());
+            }
         });
 
-        async function fetchModels() { /* ... (Identique) ... */
-            logMessage('Chargement des modèles...');
+        async function fetchModels() {
+            // ... (logique de la Version Simple, qui fonctionne)
             try {
+                logMessage('Chargement de la liste des modèles...');
                 const response = await fetch(`${API_BASE_URL}/models`, { headers: {'ngrok-skip-browser-warning': 'true'} });
-                if (!response.ok) throw new Error(`Serveur: ${response.status} ${await response.text()}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erreur serveur (${response.status}) lors du chargement des modèles: ${errorText.substring(0,200)}`);
+                }
                 const models = await response.json();
                 modelSelect.innerHTML = models.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
-                logMessage(models.length > 0 ? `${models.length} modèles trouvés.` : 'Aucun modèle trouvé.', models.length > 0 ? 'SUCCESS' : 'WARNING');
-                if (models.length === 0) modelStatus.textContent = "Aucun modèle sur serveur.";
+                logMessage(models.length > 0 ? `Liste des modèles chargée (${models.length} trouvés).` : 'Aucun modèle .pt trouvé.', models.length > 0 ? 'SUCCESS' : 'WARNING');
+                if (models.length === 0) modelStatus.textContent = "Aucun modèle sur le serveur.";
             } catch (error) {
-                logMessage(`Erreur chargement modèles: ${error.message}`, 'ERROR');
-                modelStatus.textContent = "Erreur modèles.";
+                logMessage(`Erreur lors du chargement des modèles: ${error.message}`, 'ERROR');
+                modelStatus.textContent = "Erreur chargement modèles.";
             }
         }
 
-        loadModelBtn.addEventListener('click', async () => { /* ... (Identique) ... */
-            const modelName = modelSelect.value;
-            if (!modelName) { logMessage('Sélectionnez un modèle.', 'WARNING'); return; }
-            
-            logMessage(`Chargement: ${modelName}...`);
-            modelStatus.textContent = `Chargement ${modelName}...`;
-            loadModelBtn.disabled = true;
-            
+        loadModelBtnCard.addEventListener('click', async () => {
+            // ... (logique de la Version Simple, qui fonctionne)
+            const selectedModelName = modelSelect.value;
+            if (!selectedModelName) {
+                logMessage('Veuillez sélectionner un modèle.', 'WARNING');
+                return;
+            }
+            logMessage(`Chargement du modèle: ${selectedModelName}...`);
+            modelStatus.textContent = `Chargement de ${selectedModelName}...`;
+            loadModelBtnCard.disabled = true;
+            updateAllActionButtonsState(); 
+
             try {
                 const response = await fetch(`${API_BASE_URL}/load_model`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                    body: JSON.stringify({ model_name: modelName })
+                    body: JSON.stringify({ model_name: selectedModelName })
                 });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.detail || `Serveur: ${response.status}`);
-                modelStatus.textContent = `Modèle chargé: ${modelName}`;
-                logMessage(`${modelName} chargé avec succès.`, 'SUCCESS');
+                if (!response.ok) {
+                     const errorText = result.detail || await response.text();
+                    throw new Error(errorText || `Erreur serveur (${response.status})`);
+                }
+                modelStatus.textContent = `Modèle chargé: ${selectedModelName}`;
+                logMessage(`Modèle ${selectedModelName} chargé avec succès.`, 'SUCCESS');
             } catch (error) {
-                modelStatus.textContent = "Erreur chargement.";
-                logMessage(`Erreur chargement ${modelName}: ${error.message}`, 'ERROR');
+                modelStatus.textContent = "Erreur chargement modèle.";
+                logMessage(`Erreur lors du chargement du modèle: ${error.message}`, 'ERROR');
             } finally {
-                loadModelBtn.disabled = false;
-                updateActionButtonsState();
+                loadModelBtnCard.disabled = false;
+                updateAllActionButtonsState();
             }
         });
-        
+
         imageUploadInput.addEventListener('change', (event) => {
-            logMessage("ImageUploadInput: Fichier sélectionné.", "DEBUG_MOBILE");
+            // *** Utilisation de la logique éprouvée de la "Version Simple" ***
             currentImageFile = event.target.files[0];
-
             if (currentImageFile) {
-                fileNameDisplay.textContent = currentImageFile.name;
-                imagePlaceholder.style.display = 'none'; // Cacher le placeholder
+                fileNameDisplay.textContent = currentImageFile.name.length > 30 ? currentImageFile.name.substring(0,27) + "..." : currentImageFile.name;
+                imagePlaceholderText.style.display = 'none'; // Cacher le placeholder
 
-                // S'assurer que l'image et le canvas sont prêts à être montrés (CSS display: block)
-                // mais encore transparents.
-                uploadedImageDisplay.style.display = 'block';
-                overlayCanvas.style.display = 'block';
-                uploadedImageDisplay.style.opacity = '0';
-                overlayCanvas.style.opacity = '0';
-                
-                // Effacer le contenu précédent de l'image pour forcer le rechargement
-                uploadedImageDisplay.src = ""; // Ou "#" ou "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" (pixel transparent)
-
-                logMessage("ImageUploadInput: FileReader va lire.", "DEBUG_MOBILE");
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    logMessage("ImageUploadInput: FileReader.onload - src va être défini.", "DEBUG_MOBILE");
                     uploadedImageDisplay.src = e.target.result;
-                    // Le reste de la logique est dans uploadedImageDisplay.onload
-                };
-                reader.onerror = () => {
-                    logMessage("ImageUploadInput: Erreur FileReader.", "ERROR");
-                    resetImagePreview();
-                };
-                reader.readAsDataURL(currentImageFile);
+                    uploadedImageDisplay.style.display = 'block'; // Afficher l'élément img
+                    
+                    // Définir l'handler onload pour l'image ICI, APRÈS avoir défini la src
+                    // et AVANT que l'image n'ait eu le temps de se charger (surtout depuis cache)
+                    uploadedImageDisplay.onload = () => {
+                        logMessage("uploadedImageDisplay.onload: Image chargée dans <img>", "DEBUG_MOBILE");
+                        originalImageWidth = uploadedImageDisplay.naturalWidth;
+                        originalImageHeight = uploadedImageDisplay.naturalHeight;
+                        
+                        if (originalImageWidth === 0 || originalImageHeight === 0) {
+                             logMessage("uploadedImageDisplay.onload: Dimensions naturelles nulles!", "ERROR");
+                             resetImagePreview(); // L'image est invalide
+                             return;
+                        }
 
+                        adjustCanvasAndDraw(); // Calcule et positionne
+                        
+                        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); 
+                        lastDrawnBoxes = [];
+                        logMessage(`Image "${currentImageFile.name}" chargée (${originalImageWidth}x${originalImageHeight}).`, 'INFO');
+                        updateAllActionButtonsState();
+                    };
+                    uploadedImageDisplay.onerror = () => {
+                        logMessage("Erreur de chargement de l'image dans l'élément <img>.", "ERROR");
+                        resetImagePreview();
+                    }
+                }
+                reader.readAsDataURL(currentImageFile);
             } else {
-                logMessage("ImageUploadInput: Aucun fichier sélectionné ou annulation.", "DEBUG_MOBILE");
                 resetImagePreview();
             }
-            updateActionButtonsState();
         });
 
-        // Centraliser la logique post-chargement de l'image
-        uploadedImageDisplay.onload = () => {
-            logMessage("uploadedImageDisplay.onload: Image chargée dans l'élément <img>.", "DEBUG_MOBILE");
-            if (!currentImageFile) { // Sanity check, si l'utilisateur a annulé entre-temps
-                logMessage("uploadedImageDisplay.onload: currentImageFile est null, reset.", "WARNING");
-                resetImagePreview();
-                return;
-            }
-            originalImageWidth = uploadedImageDisplay.naturalWidth;
-            originalImageHeight = uploadedImageDisplay.naturalHeight;
-            logMessage(`uploadedImageDisplay.onload: Dimensions naturelles ${originalImageWidth}x${originalImageHeight}`, "DEBUG_MOBILE");
-
-            if (originalImageWidth === 0 || originalImageHeight === 0) {
-                logMessage("uploadedImageDisplay.onload: Dimensions naturelles sont zéro! Problème de chargement.", "ERROR");
-                resetImagePreview(); // Peut-être que l'image n'est pas valide
-                return;
-            }
-            
-            lastDrawnBoxes = [];
-            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            
-            adjustCanvasAndDraw(); // Calcule tailles, positions ET rend visible (opacity)
-            logMessage(`uploadedImageDisplay.onload: Image "${currentImageFile.name}" prête.`, 'INFO');
-        };
-
-        uploadedImageDisplay.onerror = () => {
-            logMessage("uploadedImageDisplay.onerror: Erreur de chargement de l'image dans l'élément <img>.", "ERROR");
-            resetImagePreview();
-        };
-
-
         function resetImagePreview() {
-            logMessage("resetImagePreview: Réinitialisation de l'aperçu.", "DEBUG_MOBILE");
             fileNameDisplay.textContent = "";
-            uploadedImageDisplay.src = "#"; // Vide la source
-            uploadedImageDisplay.style.width = 'auto';
-            uploadedImageDisplay.style.height = 'auto';
-            uploadedImageDisplay.style.opacity = '0';
-            // uploadedImageDisplay.style.display = 'none'; // On le garde 'block' car le conteneur est flex
-
-            overlayCanvas.style.opacity = '0';
-            // overlayCanvas.style.display = 'none'; // Idem
-            if (ctx && overlayCanvas.width > 0) { // S'assurer qu'ils existent et ont une taille
-                 ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            }
-            overlayCanvas.width = 0; // Réinitialiser taille canvas
+            uploadedImageDisplay.style.display = 'none';
+            uploadedImageDisplay.src = "#"; // Vider src
+            imagePlaceholderText.style.display = 'block';
+            
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            overlayCanvas.width = 0; // Reset dimensions canvas
             overlayCanvas.height = 0;
 
-
-            imagePlaceholder.style.display = 'block'; // Afficher le placeholder
             currentImageFile = null;
             originalImageWidth = 0;
             originalImageHeight = 0;
             lastDrawnBoxes = [];
-            updateActionButtonsState(); // Mettre à jour les boutons
+            updateAllActionButtonsState();
         }
 
-
-        useSahiCheckbox.addEventListener('change', () => { /* ... (Identique) ... */
+        useSahiCheckbox.addEventListener('change', () => {
             sahiOptionsDiv.style.display = useSahiCheckbox.checked ? 'block' : 'none';
         });
 
-        async function handlePrediction() { /* ... (Identique) ... */
-             if (!currentImageFile || !modelStatus.textContent.startsWith('Modèle chargé:')) {
-                logMessage('Chargez modèle et image.', 'WARNING'); return;
+
+        async function handleGenericPrediction() {
+            // ... (logique de la Version Simple, qui fonctionne)
+            if (!currentImageFile || !modelStatus.textContent.startsWith('Modèle chargé:')) {
+                logMessage('Veuillez charger un modèle et une image.', 'WARNING');
+                return;
             }
-            logMessage('Analyse en cours...', 'INFO');
-            [predictBtnMobile, predictBtnDesktop].forEach(btn => btn.disabled = true);
+
+            logMessage('Lancement de la prédiction...', 'INFO');
+            // Désactiver tous les boutons de prédiction
+            predictBtnMobile.disabled = true;
+            predictBtnDesktop.disabled = true;
             // ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Fait dans drawBoundingBoxes
-            // lastDrawnBoxes = []; // Fait dans drawBoundingBoxes (implicitement)
+            // lastDrawnBoxes = []; // Idem
 
             const params = {
                 confidence: parseFloat(confidenceInput.value), img_size: parseInt(imgSizeInput.value),
@@ -641,145 +663,141 @@
                 sahi_overlap_height_ratio: parseFloat(sahiOverlapHeightInput.value),
                 sahi_overlap_width_ratio: parseFloat(sahiOverlapWidthInput.value),
             };
+            
             const queryParams = new URLSearchParams(params);
             const finalPredictUrl = `${API_BASE_URL}/predict?${queryParams.toString()}`;
-            const fileData = new FormData();
-            fileData.append('file', currentImageFile);
+            const fileDataOnly = new FormData();
+            fileDataOnly.append('file', currentImageFile);
 
             try {
                 const response = await fetch(finalPredictUrl, {
-                    method: 'POST', body: fileData, headers: {'ngrok-skip-browser-warning': 'true'}
+                    method: 'POST', body: fileDataOnly, headers: {'ngrok-skip-browser-warning': 'true'}
                 });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.detail || `Serveur: ${response.status}`);
-                logMessage(`Analyse: ${result.boxes.length} boîtes trouvées.`, 'SUCCESS');
+                if (!response.ok) {
+                    const errorText = result.detail || await response.text();
+                    throw new Error(errorText || `Erreur serveur (${response.status})`);
+                }
+                logMessage(`Prédiction terminée. ${result.boxes.length} boîtes trouvées.`, 'SUCCESS');
                 lastDrawnBoxes = result.boxes;
-                drawBoundingBoxes(lastDrawnBoxes); 
+                drawBoundingBoxes(lastDrawnBoxes);
             } catch (error) {
-                logMessage(`Erreur prédiction: ${error.message}`, 'ERROR');
+                logMessage(`Erreur lors de la prédiction: ${error.message}`, 'ERROR');
             } finally {
-                updateActionButtonsState(); 
+                updateAllActionButtonsState(); // Réactive en fonction de l'état global
             }
         }
-        predictBtnMobile.addEventListener('click', handlePrediction);
-        predictBtnDesktop.addEventListener('click', handlePrediction);
-
-        async function handleLlmDescription() { /* ... (Identique) ... */
+        predictBtnMobile.addEventListener('click', handleGenericPrediction);
+        predictBtnDesktop.addEventListener('click', handleGenericPrediction);
+        
+        async function handleGenericDescribeLlm() {
+            // ... (logique de la Version Simple, qui fonctionne)
             if (!currentImageFile) {
-                 logMessage('Téléchargez une image pour la description.', 'WARNING'); return;
+                logMessage('Veuillez d\'abord télécharger une image.', 'WARNING');
+                return;
             }
-            logMessage('Description LLM en cours...', 'INFO');
+            logMessage('Demande de description LLM...', 'INFO');
             llmDescriptionOutput.textContent = 'En cours...';
-            [describeLlmBtnMobile, describeLlmBtnDesktop].forEach(btn => btn.disabled = true);
+            describeLlmBtnMobile.disabled = true;
+            describeLlmBtnDesktop.disabled = true;
 
             try {
                 const reader = new FileReader();
                 reader.readAsDataURL(currentImageFile);
-                reader.onloadend = async () => {
-                    const base64Image = reader.result.split(',')[1];
+                reader.onloadend = async () => { // Utiliser onloadend pour s'assurer que la lecture est terminée
+                    const base64Image = reader.result.split(',')[1]; 
                     const response = await fetch(`${API_BASE_URL}/describe_llm`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                        body: JSON.stringify({ image_base64: base64Image, prompt: "Décris cette image de manière concise." })
+                        body: JSON.stringify({ image_base64: base64Image, prompt: "Décris cette image." })
                     });
                     const result = await response.json();
-                    if (!response.ok) throw new Error(result.detail || `Erreur LLM (${response.status})`);
+                    if (!response.ok) {
+                        const errorText = result.detail || await response.text();
+                        throw new Error(errorText || `Erreur LLM (${response.status})`);
+                    }
                     llmDescriptionOutput.textContent = result.description;
                     logMessage('Description LLM reçue.', 'SUCCESS');
                 };
-                reader.onerror = () => { throw new Error('Erreur lecture fichier pour LLM.'); };
+                reader.onerror = (error) => {
+                     logMessage('Erreur de lecture du fichier pour LLM.', 'ERROR');
+                     throw new Error('Erreur de lecture du fichier pour LLM.'); // Pour que le catch externe le prenne
+                };
             } catch (error) {
                 logMessage(`Erreur LLM: ${error.message}`, 'ERROR');
                 llmDescriptionOutput.textContent = `Erreur: ${error.message}`;
             } finally {
-                 updateActionButtonsState();
+                updateAllActionButtonsState();
             }
         }
-        describeLlmBtnMobile.addEventListener('click', handleLlmDescription);
-        describeLlmBtnDesktop.addEventListener('click', handleLlmDescription);
+        describeLlmBtnMobile.addEventListener('click', handleGenericDescribeLlm);
+        describeLlmBtnDesktop.addEventListener('click', handleGenericDescribeLlm);
 
-        // --- Canvas & Dessin ---
+        // --- Canvas & Dessin (Logique de la Version Simple) ---
         function adjustCanvasAndDraw() {
-            logMessage("adjustCanvasAndDraw: Début.", "DEBUG_MOBILE");
-            if (!currentImageFile || originalImageWidth === 0 || originalImageHeight === 0) {
-                logMessage("adjustCanvasAndDraw: Pas d'image ou dimensions originales nulles. Stop.", "WARNING");
-                // On ne fait pas de requestAnimationFrame ici, car cela devrait être appelé depuis uploadedImageDisplay.onload
+            // logMessage("adjustCanvasAndDraw: Appelée", "DEBUG_MOBILE");
+            if (uploadedImageDisplay.style.display !== 'block' || !currentImageFile || originalImageWidth === 0) {
+                // logMessage("adjustCanvasAndDraw: Condition non remplie, retour.", "DEBUG_MOBILE");
                 return;
             }
+
+            // Utiliser getBoundingClientRect pour les dimensions affichées de l'image
+            const imgRect = uploadedImageDisplay.getBoundingClientRect();
+            // Le conteneur parent de l'image et du canvas
+            const previewContainerRect = uploadedImageDisplay.parentElement.getBoundingClientRect();
+
+            // Les dimensions réelles de l'image affichée à l'écran
+            const displayedImgWidth = imgRect.width;
+            const displayedImgHeight = imgRect.height;
+
+            // logMessage(`adjustCanvasAndDraw: imgRect ${displayedImgWidth.toFixed(0)}x${displayedImgHeight.toFixed(0)}`, "DEBUG_MOBILE");
             
-            const containerWidth = imagePreviewContainer.clientWidth;
-            const containerHeight = imagePreviewContainer.clientHeight;
-            logMessage(`adjustCanvasAndDraw: Conteneur ${containerWidth}x${containerHeight}`, "DEBUG_MOBILE");
+            overlayCanvas.width = displayedImgWidth;
+            overlayCanvas.height = displayedImgHeight;
 
+            // Calculer le décalage du canvas pour qu'il se superpose à l'image
+            // L'image est centrée dans son conteneur via flexbox.
+            // Le canvas doit être positionné par rapport au coin supérieur gauche de l'image affichée.
+            // imgRect.top/left sont relatifs au viewport.
+            // previewContainerRect.top/left sont relatifs au viewport.
+            // Donc, la position du canvas (qui est enfant de previewContainer) doit être:
+            const canvasTop = imgRect.top - previewContainerRect.top;
+            const canvasLeft = imgRect.left - previewContainerRect.left;
 
-            const imgAspectRatio = originalImageWidth / originalImageHeight;
-            let displayWidth, displayHeight;
-
-            if (containerWidth / containerHeight > imgAspectRatio) {
-                displayHeight = containerHeight;
-                displayWidth = displayHeight * imgAspectRatio;
-            } else {
-                displayWidth = containerWidth;
-                displayHeight = displayWidth / imgAspectRatio;
-            }
+            overlayCanvas.style.top = `${canvasTop}px`;
+            overlayCanvas.style.left = `${canvasLeft}px`;
             
-            // S'assurer que les dimensions ne sont pas négatives ou nulles
-            displayWidth = Math.max(1, displayWidth);
-            displayHeight = Math.max(1, displayHeight);
-
-            logMessage(`adjustCanvasAndDraw: Image calculée ${displayWidth.toFixed(2)}x${displayHeight.toFixed(2)}`, "DEBUG_MOBILE");
-
-            uploadedImageDisplay.style.width = `${displayWidth}px`;
-            uploadedImageDisplay.style.height = `${displayHeight}px`;
-            uploadedImageDisplay.style.top = `${(containerHeight - displayHeight) / 2}px`;
-            uploadedImageDisplay.style.left = `${(containerWidth - displayWidth) / 2}px`;
-            
-            overlayCanvas.width = displayWidth;
-            overlayCanvas.height = displayHeight;
-            overlayCanvas.style.top = uploadedImageDisplay.style.top;
-            overlayCanvas.style.left = uploadedImageDisplay.style.left;
-            
-            // Rendre visible avec une transition douce
-            requestAnimationFrame(() => { // Pour s'assurer que le navigateur a pris en compte les changements de style
-                uploadedImageDisplay.style.opacity = '1';
-                overlayCanvas.style.opacity = '1';
-            });
-            logMessage("adjustCanvasAndDraw: Opacité mise à 1 (devrait être visible).", "DEBUG_MOBILE");
-
+            // logMessage(`adjustCanvasAndDraw: Canvas positionné à ${canvasLeft.toFixed(0)},${canvasTop.toFixed(0)}`, "DEBUG_MOBILE");
             drawBoundingBoxes(lastDrawnBoxes);
         }
 
         function drawBoundingBoxes(boxes) {
-            // logMessage("drawBoundingBoxes: Début.", "DEBUG_MOBILE");
-            if (!overlayCanvas.width || !overlayCanvas.height) {
-                logMessage("drawBoundingBoxes: Canvas sans dimensions. Stop.", "WARNING");
-                return;
-            }
+            if (!boxes || overlayCanvas.width === 0) return; // Ne pas dessiner si pas de boîtes ou canvas non dimensionné
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            if (!boxes || boxes.length === 0) {
-                // logMessage("drawBoundingBoxes: Pas de boîtes à dessiner.", "DEBUG_MOBILE");
-                return;
-            }
+            if (boxes.length === 0) return;
 
-            ctx.strokeStyle = 'rgba(255, 59, 48, 0.9)';
-            ctx.lineWidth = Math.max(1.5, Math.min(overlayCanvas.width, overlayCanvas.height) / 250);
+            ctx.strokeStyle = 'red';
+            // Utiliser les dimensions actuelles du canvas (qui sont celles de l'image affichée)
+            ctx.lineWidth = Math.max(1, Math.min(overlayCanvas.width, overlayCanvas.height) / 200);
 
             const scaleX = overlayCanvas.width / originalImageWidth;
             const scaleY = overlayCanvas.height / originalImageHeight;
 
             boxes.forEach(box => {
-                ctx.strokeRect(box.x1 * scaleX, box.y1 * scaleY, (box.x2 - box.x1) * scaleX, (box.y2 - box.y1) * scaleY);
+                const x1 = box.x1 * scaleX;
+                const y1 = box.y1 * scaleY;
+                const width = (box.x2 - box.x1) * scaleX;
+                const height = (box.y2 - box.y1) * scaleY;
+                ctx.strokeRect(x1, y1, width, height);
             });
-            // logMessage(`drawBoundingBoxes: ${boxes.length} boîtes dessinées.`, "DEBUG_MOBILE");
         }
         
         window.addEventListener('resize', () => {
-            if (currentImageFile && originalImageWidth > 0) { // Si une image est chargée et ses dimensions connues
-                logMessage("window.resize: Redimensionnement détecté.", "DEBUG_MOBILE");
+             if (currentImageFile && originalImageWidth > 0) { 
+                // logMessage("window.resize: Appel adjustCanvasAndDraw", "DEBUG_MOBILE");
                 adjustCanvasAndDraw();
-            }
+             }
         });
-
     </script>
 </body>
 </html>
