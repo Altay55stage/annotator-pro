@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>YOLO Annotator</title>
     <style>
+        /* ... (Styles :root, *, html, body, .app-container, .app-header, .app-content, .card, .card-title, .card-subtitle, label, .file-input-label, input[type=text/number/select], .checkbox-container, #modelStatus - IDENTIQUES) ... */
         :root {
             --app-bg-color: #f0f2f5;
             --card-bg-color: #ffffff;
@@ -94,9 +95,8 @@
             font-size: 0.95em;
             color: var(--text-color);
         }
-        /* Custom file input label style */
         .file-input-label {
-            display: block; /* Pour qu'il prenne toute la largeur */
+            display: block; 
             width: 100%;
             padding: 12px;
             border: 1px dashed var(--primary-color);
@@ -105,7 +105,7 @@
             color: var(--primary-color);
             text-align: center;
             cursor: pointer;
-            margin-bottom: 5px; /* Réduit si fileNameDisplay est en dessous */
+            margin-bottom: 5px; 
             font-weight: 500;
         }
 
@@ -120,7 +120,6 @@
             background-color: #f8f8f8;
             margin-bottom: 15px;
         }
-        /* input[type="file"] est caché, le label est utilisé */
 
         .checkbox-container {
             display: flex;
@@ -145,42 +144,45 @@
             padding: 5px 0;
         }
 
-        /* MODIFIED/REVIEWED STYLES FOR IMAGE PREVIEW */
         .image-preview-container {
             width: 100%;
-            min-height: 180px; /* Ajusté pour mobile */
-            max-height: 45vh; /* Conserve une hauteur relative à la vue */
+            min-height: 180px;
+            max-height: 45vh; 
             background-color: #e9ecef;
             border-radius: 8px;
-            display: flex; /* Utilisé pour centrer le placeholder */
+            display: flex; 
             align-items: center;
             justify-content: center;
-            margin-top: 10px; /* Un peu moins d'espace si fileNameDisplay est là */
-            position: relative; /* Crucial pour le positionnement absolu des enfants */
-            overflow: hidden; /* Empêche tout débordement */
+            margin-top: 10px; 
+            position: relative; 
+            overflow: hidden; 
         }
 
         #uploadedImageDisplay {
-            display: none; /* Initialement caché, affiché par JS */
-            /* width et height seront définis par JS pour maintenir l'aspect ratio */
-            /* position: absolute et top/left seront définis par JS pour le centrage */
-            object-fit: contain; /* Assure que l'image est contenue si ses dimensions JS sont plus grandes que l'espace réel */
+            /* display: none; -- initialement géré par JS, mais on peut forcer block si le parent est visible */
+            display: block; /* On le met visible, sa source déterminera s'il y a qqch à montrer */
+            position: absolute; /* Géré par JS pour centrage */
+            /* width et height seront définis par JS */
+            object-fit: contain; 
+            opacity: 0; /* Caché par opacité, rendu visible par JS une fois chargé */
+            transition: opacity 0.3s ease-in-out;
         }
 
         #overlayCanvas {
-            position: absolute; /* Positionné par rapport à .image-preview-container */
-            /* top, left, width, height seront définis par JS */
+            position: absolute; 
             pointer-events: none;
-            display: none; /* Initialement caché, affiché avec l'image */
+            display: block; /* Toujours block, mais son contenu le rendra "visible" */
+            opacity: 0; /* Caché par opacité, rendu visible par JS une fois image chargée */
+            transition: opacity 0.3s ease-in-out;
         }
         .image-placeholder-text {
             color: var(--secondary-text-color);
             font-size: 0.9em;
-            text-align: center; /* S'assurer que le texte est centré */
+            text-align: center;
+            /* display: block; -- géré par JS */
         }
-        /* END OF MODIFIED/REVIEWED STYLES FOR IMAGE PREVIEW */
 
-
+        /* ... (Styles .log-output-card, pre, .app-bottom-actions, .action-button, details, @media - IDENTIQUES) ... */
         .log-output-card .card-title {
             margin-bottom: 8px;
         }
@@ -225,7 +227,7 @@
             cursor: pointer;
             margin: 0 8px;
             height: 40px;
-            line-height: 20px; /* Aide au centrage vertical du texte */
+            line-height: 20px; 
         }
         .action-button:disabled {
             background-color: #b0bec5;
@@ -288,7 +290,7 @@
                 flex: 1;
             }
              .image-preview-container {
-                max-height: 500px; /* Plus de hauteur sur desktop */
+                max-height: 500px; 
                 min-height: 300px;
             }
             pre { max-height: 200px; }
@@ -408,10 +410,11 @@
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const uploadedImageDisplay = document.getElementById('uploadedImageDisplay');
         const imagePlaceholder = document.getElementById('imagePlaceholder');
-        const imagePreviewContainer = document.querySelector('.image-preview-container'); // Ajouté
+        const imagePreviewContainer = document.querySelector('.image-preview-container');
         const overlayCanvas = document.getElementById('overlayCanvas');
         const ctx = overlayCanvas.getContext('2d');
 
+        // ... (autres éléments DOM identiques)
         const confidenceInput = document.getElementById('confidence');
         const imgSizeInput = document.getElementById('imgSize');
         const nmsIouInput = document.getElementById('nmsIou');
@@ -432,23 +435,25 @@
         const logOutput = document.getElementById('logOutput');
         const llmDescriptionOutput = document.getElementById('llmDescriptionOutput');
 
-        const API_BASE_URL = 'https://cf57-193-55-66-31.ngrok-free.app'; // <--- METTRE À JOUR VOTRE URL NGROK ICI
+        const API_BASE_URL = 'https://cf57-193-55-66-31.ngrok-free.app'; 
 
         let currentImageFile = null;
         let originalImageWidth = 0;
         let originalImageHeight = 0;
-        // let imageDisplayWidth = 0; // Ces valeurs seront calculées dans adjustCanvasAndDraw
-        // let imageDisplayHeight = 0;
         let lastDrawnBoxes = [];
 
-        function logMessage(message, type = 'INFO') {
+        function logMessage(message, type = 'INFO') { /* ... (Identique) ... */
             const timestamp = new Date().toLocaleTimeString();
             const newLogEntry = `[${timestamp} ${type}] ${message}\n`;
             logOutput.textContent = newLogEntry + logOutput.textContent.substring(0, 5000);
-            console.log(`[${type}] ${message}`);
+            if (type === 'ERROR' || type === 'DEBUG_MOBILE') { // Pour forcer l'affichage console
+                 console.error(`[${type}] ${message}`);
+            } else {
+                 console.log(`[${type}] ${message}`);
+            }
         }
 
-        function updateActionButtonsState() {
+        function updateActionButtonsState() { /* ... (Identique) ... */
             const modelLoaded = modelStatus.textContent.startsWith('Modèle chargé:');
             const imageSelected = !!currentImageFile;
             const canPredict = modelLoaded && imageSelected;
@@ -458,10 +463,10 @@
             [describeLlmBtnMobile, describeLlmBtnDesktop].forEach(btn => btn.disabled = !canDescribe);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => { /* ... (Identique) ... */
             fetchModels();
             logMessage("Interface initialisée. API: " + API_BASE_URL, "SYSTEM");
-            if (API_BASE_URL.includes("ngrok-free.app") && API_BASE_URL.includes("xxxxxxx")) { // Plus générique
+             if (API_BASE_URL.includes("ngrok-free.app") && API_BASE_URL.includes("xxxxxxx")) { 
                  logMessage("ASSUREZ-VOUS DE METTRE À JOUR API_BASE_URL avec votre URL ngrok !", "IMPORTANT_WARNING");
             } else if (API_BASE_URL === 'https://cf57-193-55-66-31.ngrok-free.app') {
                  logMessage("RAPPEL: L'URL API est une valeur d'exemple. Mettez à jour si c'est votre ancienne URL.", "WARNING");
@@ -471,9 +476,13 @@
             if(imageUploadLabel) {
                 imageUploadLabel.addEventListener('click', () => imageUploadInput.click());
             }
+            // Initial state of placeholder
+            imagePlaceholder.style.display = 'block';
+            uploadedImageDisplay.style.opacity = '0';
+            overlayCanvas.style.opacity = '0';
         });
 
-        async function fetchModels() { /* ... (Identique à votre code) ... */
+        async function fetchModels() { /* ... (Identique) ... */
             logMessage('Chargement des modèles...');
             try {
                 const response = await fetch(`${API_BASE_URL}/models`, { headers: {'ngrok-skip-browser-warning': 'true'} });
@@ -488,7 +497,7 @@
             }
         }
 
-        loadModelBtn.addEventListener('click', async () => { /* ... (Identique à votre code) ... */
+        loadModelBtn.addEventListener('click', async () => { /* ... (Identique) ... */
             const modelName = modelSelect.value;
             if (!modelName) { logMessage('Sélectionnez un modèle.', 'WARNING'); return; }
             
@@ -516,71 +525,113 @@
         });
         
         imageUploadInput.addEventListener('change', (event) => {
+            logMessage("ImageUploadInput: Fichier sélectionné.", "DEBUG_MOBILE");
             currentImageFile = event.target.files[0];
+
             if (currentImageFile) {
                 fileNameDisplay.textContent = currentImageFile.name;
-                imagePlaceholder.style.display = 'none';
-                // Ne pas afficher uploadedImageDisplay ou overlayCanvas ici, adjustCanvasAndDraw s'en chargera
+                imagePlaceholder.style.display = 'none'; // Cacher le placeholder
+
+                // S'assurer que l'image et le canvas sont prêts à être montrés (CSS display: block)
+                // mais encore transparents.
+                uploadedImageDisplay.style.display = 'block';
+                overlayCanvas.style.display = 'block';
+                uploadedImageDisplay.style.opacity = '0';
+                overlayCanvas.style.opacity = '0';
                 
+                // Effacer le contenu précédent de l'image pour forcer le rechargement
+                uploadedImageDisplay.src = ""; // Ou "#" ou "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" (pixel transparent)
+
+                logMessage("ImageUploadInput: FileReader va lire.", "DEBUG_MOBILE");
                 const reader = new FileReader();
                 reader.onload = (e) => {
+                    logMessage("ImageUploadInput: FileReader.onload - src va être défini.", "DEBUG_MOBILE");
                     uploadedImageDisplay.src = e.target.result;
-                    // La magie opère dans uploadedImageDisplay.onload
-                }
-                reader.readAsDataURL(currentImageFile);
-
-                // Mettre cet écouteur ici garantit qu'il est frais pour chaque nouvelle image
-                uploadedImageDisplay.onload = () => {
-                    originalImageWidth = uploadedImageDisplay.naturalWidth;
-                    originalImageHeight = uploadedImageDisplay.naturalHeight;
-                    
-                    // Afficher l'image et le canvas maintenant qu'on a les dimensions
-                    uploadedImageDisplay.style.display = 'block';
-                    overlayCanvas.style.display = 'block';
-
-                    adjustCanvasAndDraw(); // Calcule tailles et positions, puis dessine
-                    lastDrawnBoxes = []; // Clear previous boxes for a new image
-                    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Explicitement
-                    logMessage(`Image "${currentImageFile.name}" chargée (${originalImageWidth}x${originalImageHeight}).`, 'INFO');
+                    // Le reste de la logique est dans uploadedImageDisplay.onload
                 };
-                uploadedImageDisplay.onerror = () => {
-                    logMessage("Erreur: Impossible de charger l'aperçu de l'image.", "ERROR");
+                reader.onerror = () => {
+                    logMessage("ImageUploadInput: Erreur FileReader.", "ERROR");
                     resetImagePreview();
                 };
+                reader.readAsDataURL(currentImageFile);
 
             } else {
+                logMessage("ImageUploadInput: Aucun fichier sélectionné ou annulation.", "DEBUG_MOBILE");
                 resetImagePreview();
             }
             updateActionButtonsState();
         });
 
+        // Centraliser la logique post-chargement de l'image
+        uploadedImageDisplay.onload = () => {
+            logMessage("uploadedImageDisplay.onload: Image chargée dans l'élément <img>.", "DEBUG_MOBILE");
+            if (!currentImageFile) { // Sanity check, si l'utilisateur a annulé entre-temps
+                logMessage("uploadedImageDisplay.onload: currentImageFile est null, reset.", "WARNING");
+                resetImagePreview();
+                return;
+            }
+            originalImageWidth = uploadedImageDisplay.naturalWidth;
+            originalImageHeight = uploadedImageDisplay.naturalHeight;
+            logMessage(`uploadedImageDisplay.onload: Dimensions naturelles ${originalImageWidth}x${originalImageHeight}`, "DEBUG_MOBILE");
+
+            if (originalImageWidth === 0 || originalImageHeight === 0) {
+                logMessage("uploadedImageDisplay.onload: Dimensions naturelles sont zéro! Problème de chargement.", "ERROR");
+                resetImagePreview(); // Peut-être que l'image n'est pas valide
+                return;
+            }
+            
+            lastDrawnBoxes = [];
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            adjustCanvasAndDraw(); // Calcule tailles, positions ET rend visible (opacity)
+            logMessage(`uploadedImageDisplay.onload: Image "${currentImageFile.name}" prête.`, 'INFO');
+        };
+
+        uploadedImageDisplay.onerror = () => {
+            logMessage("uploadedImageDisplay.onerror: Erreur de chargement de l'image dans l'élément <img>.", "ERROR");
+            resetImagePreview();
+        };
+
+
         function resetImagePreview() {
+            logMessage("resetImagePreview: Réinitialisation de l'aperçu.", "DEBUG_MOBILE");
             fileNameDisplay.textContent = "";
-            uploadedImageDisplay.style.display = 'none';
-            overlayCanvas.style.display = 'none';
-            imagePlaceholder.style.display = 'block';
-            currentImageFile = null; // Important
+            uploadedImageDisplay.src = "#"; // Vide la source
+            uploadedImageDisplay.style.width = 'auto';
+            uploadedImageDisplay.style.height = 'auto';
+            uploadedImageDisplay.style.opacity = '0';
+            // uploadedImageDisplay.style.display = 'none'; // On le garde 'block' car le conteneur est flex
+
+            overlayCanvas.style.opacity = '0';
+            // overlayCanvas.style.display = 'none'; // Idem
+            if (ctx && overlayCanvas.width > 0) { // S'assurer qu'ils existent et ont une taille
+                 ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            }
+            overlayCanvas.width = 0; // Réinitialiser taille canvas
+            overlayCanvas.height = 0;
+
+
+            imagePlaceholder.style.display = 'block'; // Afficher le placeholder
+            currentImageFile = null;
             originalImageWidth = 0;
             originalImageHeight = 0;
             lastDrawnBoxes = [];
-            if (ctx && overlayCanvas) { // S'assurer qu'ils existent
-                 ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            }
+            updateActionButtonsState(); // Mettre à jour les boutons
         }
 
 
-        useSahiCheckbox.addEventListener('change', () => { /* ... (Identique à votre code) ... */
+        useSahiCheckbox.addEventListener('change', () => { /* ... (Identique) ... */
             sahiOptionsDiv.style.display = useSahiCheckbox.checked ? 'block' : 'none';
         });
 
-        async function handlePrediction() { /* ... (Identique à votre code, juste pour la complétude) ... */
+        async function handlePrediction() { /* ... (Identique) ... */
              if (!currentImageFile || !modelStatus.textContent.startsWith('Modèle chargé:')) {
                 logMessage('Chargez modèle et image.', 'WARNING'); return;
             }
             logMessage('Analyse en cours...', 'INFO');
             [predictBtnMobile, predictBtnDesktop].forEach(btn => btn.disabled = true);
-            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            lastDrawnBoxes = [];
+            // ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Fait dans drawBoundingBoxes
+            // lastDrawnBoxes = []; // Fait dans drawBoundingBoxes (implicitement)
 
             const params = {
                 confidence: parseFloat(confidenceInput.value), img_size: parseInt(imgSizeInput.value),
@@ -603,7 +654,7 @@
                 if (!response.ok) throw new Error(result.detail || `Serveur: ${response.status}`);
                 logMessage(`Analyse: ${result.boxes.length} boîtes trouvées.`, 'SUCCESS');
                 lastDrawnBoxes = result.boxes;
-                drawBoundingBoxes(lastDrawnBoxes); // Va utiliser les dimensions d'affichage calculées
+                drawBoundingBoxes(lastDrawnBoxes); 
             } catch (error) {
                 logMessage(`Erreur prédiction: ${error.message}`, 'ERROR');
             } finally {
@@ -613,7 +664,7 @@
         predictBtnMobile.addEventListener('click', handlePrediction);
         predictBtnDesktop.addEventListener('click', handlePrediction);
 
-        async function handleLlmDescription() { /* ... (Identique à votre code, juste pour la complétude) ... */
+        async function handleLlmDescription() { /* ... (Identique) ... */
             if (!currentImageFile) {
                  logMessage('Téléchargez une image pour la description.', 'WARNING'); return;
             }
@@ -648,68 +699,69 @@
         describeLlmBtnDesktop.addEventListener('click', handleLlmDescription);
 
         // --- Canvas & Dessin ---
-        // REVISED adjustCanvasAndDraw
         function adjustCanvasAndDraw() {
-            if (!uploadedImageDisplay.complete || uploadedImageDisplay.naturalWidth === 0 || !currentImageFile) {
-                // Si l'image n'est pas prête (ex: src juste défini mais pas encore chargé par le navigateur)
-                // ou si currentImageFile est null (ex: après un reset)
-                // On ne fait rien ou on cache, resetImagePreview gère le cas null.
-                if (currentImageFile) {
-                    requestAnimationFrame(adjustCanvasAndDraw); // Réessayer au prochain frame si une image est attendue
-                }
+            logMessage("adjustCanvasAndDraw: Début.", "DEBUG_MOBILE");
+            if (!currentImageFile || originalImageWidth === 0 || originalImageHeight === 0) {
+                logMessage("adjustCanvasAndDraw: Pas d'image ou dimensions originales nulles. Stop.", "WARNING");
+                // On ne fait pas de requestAnimationFrame ici, car cela devrait être appelé depuis uploadedImageDisplay.onload
                 return;
             }
             
             const containerWidth = imagePreviewContainer.clientWidth;
             const containerHeight = imagePreviewContainer.clientHeight;
+            logMessage(`adjustCanvasAndDraw: Conteneur ${containerWidth}x${containerHeight}`, "DEBUG_MOBILE");
+
 
             const imgAspectRatio = originalImageWidth / originalImageHeight;
-            
             let displayWidth, displayHeight;
 
-            // Calculer les dimensions d'affichage pour s'adapter au conteneur tout en gardant le ratio
             if (containerWidth / containerHeight > imgAspectRatio) {
-                // Le conteneur est plus large (ou moins haut) que l'image
                 displayHeight = containerHeight;
                 displayWidth = displayHeight * imgAspectRatio;
             } else {
-                // Le conteneur est plus haut (ou moins large) que l'image
                 displayWidth = containerWidth;
                 displayHeight = displayWidth / imgAspectRatio;
             }
             
-            // Appliquer les dimensions à l'image
+            // S'assurer que les dimensions ne sont pas négatives ou nulles
+            displayWidth = Math.max(1, displayWidth);
+            displayHeight = Math.max(1, displayHeight);
+
+            logMessage(`adjustCanvasAndDraw: Image calculée ${displayWidth.toFixed(2)}x${displayHeight.toFixed(2)}`, "DEBUG_MOBILE");
+
             uploadedImageDisplay.style.width = `${displayWidth}px`;
             uploadedImageDisplay.style.height = `${displayHeight}px`;
-            
-            // Centrer l'image dans son conteneur (qui est flex et center)
-            // n'est plus nécessaire avec la logique flex du parent si l'image
-            // elle-même est un block. Mais si on la positionne en absolute:
-            uploadedImageDisplay.style.position = 'absolute';
             uploadedImageDisplay.style.top = `${(containerHeight - displayHeight) / 2}px`;
             uploadedImageDisplay.style.left = `${(containerWidth - displayWidth) / 2}px`;
-
-            // Ajuster le canvas pour qu'il corresponde exactement à l'image affichée
+            
             overlayCanvas.width = displayWidth;
             overlayCanvas.height = displayHeight;
-            overlayCanvas.style.top = uploadedImageDisplay.style.top; // Aligner avec l'image
-            overlayCanvas.style.left = uploadedImageDisplay.style.left; // Aligner avec l'image
+            overlayCanvas.style.top = uploadedImageDisplay.style.top;
+            overlayCanvas.style.left = uploadedImageDisplay.style.left;
             
-            // S'assurer qu'ils sont visibles (au cas où ils auraient été cachés)
-            uploadedImageDisplay.style.display = 'block';
-            overlayCanvas.style.display = 'block';
+            // Rendre visible avec une transition douce
+            requestAnimationFrame(() => { // Pour s'assurer que le navigateur a pris en compte les changements de style
+                uploadedImageDisplay.style.opacity = '1';
+                overlayCanvas.style.opacity = '1';
+            });
+            logMessage("adjustCanvasAndDraw: Opacité mise à 1 (devrait être visible).", "DEBUG_MOBILE");
 
-            drawBoundingBoxes(lastDrawnBoxes); // Redessiner avec les nouvelles dimensions
+            drawBoundingBoxes(lastDrawnBoxes);
         }
 
-
         function drawBoundingBoxes(boxes) {
-            if (!boxes || !overlayCanvas.width || !overlayCanvas.height) return; // S'assurer que le canvas a des dimensions
+            // logMessage("drawBoundingBoxes: Début.", "DEBUG_MOBILE");
+            if (!overlayCanvas.width || !overlayCanvas.height) {
+                logMessage("drawBoundingBoxes: Canvas sans dimensions. Stop.", "WARNING");
+                return;
+            }
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            if (boxes.length === 0) return;
+            if (!boxes || boxes.length === 0) {
+                // logMessage("drawBoundingBoxes: Pas de boîtes à dessiner.", "DEBUG_MOBILE");
+                return;
+            }
 
             ctx.strokeStyle = 'rgba(255, 59, 48, 0.9)';
-            // Utiliser les dimensions actuelles du canvas pour lineWidth, pas imageDisplayWidth/Height globaux
             ctx.lineWidth = Math.max(1.5, Math.min(overlayCanvas.width, overlayCanvas.height) / 250);
 
             const scaleX = overlayCanvas.width / originalImageWidth;
@@ -718,10 +770,12 @@
             boxes.forEach(box => {
                 ctx.strokeRect(box.x1 * scaleX, box.y1 * scaleY, (box.x2 - box.x1) * scaleX, (box.y2 - box.y1) * scaleY);
             });
+            // logMessage(`drawBoundingBoxes: ${boxes.length} boîtes dessinées.`, "DEBUG_MOBILE");
         }
         
         window.addEventListener('resize', () => {
-            if (currentImageFile && uploadedImageDisplay.style.display === 'block') { // Seulement si une image est affichée
+            if (currentImageFile && originalImageWidth > 0) { // Si une image est chargée et ses dimensions connues
+                logMessage("window.resize: Redimensionnement détecté.", "DEBUG_MOBILE");
                 adjustCanvasAndDraw();
             }
         });
