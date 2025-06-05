@@ -1,8 +1,9 @@
-Absolument ! C'est une excellente idée d'inclure des instructions pour NGROK, car c'est pertinent pour l'accès à distance et potentiellement pour la fonctionnalité LLM si l'API LLM externe est également exposée via NGROK.
+Okay, j'ai repéré les sections où le formatage Markdown a été un peu perturbé par les blocs de code et les commentaires IGNORE_WHEN_COPYING. Je vais nettoyer ça et m'assurer que les blocs de code sont correctement formatés en Markdown.
 
-Voici une version améliorée de ton README.md qui intègre une section sur NGROK et quelques autres améliorations pour la clarté et la structure.
+Voici la version corrigée et nettoyée :
 
 # YOLO Annotator Pro - Advanced ML Suite
+
 
 YOLO Annotator Pro est une application web complète conçue pour faciliter le cycle de vie des projets de détection d'objets avec les modèles YOLO (Ultralytics). Elle offre une interface utilisateur pour l'annotation d'images, la prédiction, la gestion de datasets, le fine-tuning de modèles, l'optimisation d'hyperparamètres (HPO), et plus encore.
 
@@ -61,11 +62,8 @@ L'application se compose de :
 
 ### 1. Cloner le dépôt
 ```bash
-git clone https://github.com/VOTRE_NOM_UTILISATEUR/VOTRE_NOM_DE_DEPOT.git
-cd VOTRE_NOM_DE_DEPOT
-
-
-(Remplacez par votre URL de dépôt réelle)
+git clone https://github.com/Altay55stage/annotator-pro.git
+cd annotator-pro
 
 2. Créer et activer un environnement virtuel
 python -m venv venv
@@ -77,6 +75,9 @@ Use code with caution.
 Bash
 IGNORE_WHEN_COPYING_END
 3. Installer les dépendances
+
+(Assurez-vous que le fichier requirements.txt est présent à la racine du projet)
+
 pip install -r requirements.txt
 IGNORE_WHEN_COPYING_START
 content_copy
@@ -157,6 +158,8 @@ Use code with caution.
 Bash
 IGNORE_WHEN_COPYING_END
 
+(Adaptez ./ngrok pour ngrok.exe sur Windows si nécessaire)
+
 C. Exposer votre backend FastAPI (qui tourne sur le port 8001):
 Dans un nouveau terminal, naviguez vers le dossier où vous avez décompressé NGROK et exécutez :
 
@@ -168,13 +171,14 @@ Use code with caution.
 Bash
 IGNORE_WHEN_COPYING_END
 
+(Adaptez ./ngrok pour ngrok.exe sur Windows si nécessaire)
 NGROK affichera une URL publique (ex: https://random-string.ngrok-free.app). C'est cette URL que vous utiliserez pour API_BASE_URL dans le frontend si vous accédez via NGROK.
 
 Note : L'URL gratuite de NGROK change à chaque redémarrage de NGROK.
 
 3. Accéder à l'Interface Utilisateur
 
-Ouvrez le fichier index2.html directement dans votre navigateur web (ex: double-cliquez dessus ou file:///chemin/vers/votre/projet/index2.html).
+Ouvrez le fichier index2.html directement dans votre navigateur web (ex: double-cliquez dessus ou file:///chemin/vers/le/projet/annotator-pro/index2.html).
 
 IMPORTANT : Configurer API_BASE_URL dans index2.html:
 Ouvrez index2.html dans un éditeur de texte et trouvez la ligne (vers le début de la balise <script>):
@@ -258,5 +262,3 @@ TASKS_DB_FILE (annotator_tasks_db.json): Base de données JSON pour le statut de
 Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à forker le dépôt, créer une branche, faire vos modifications et ouvrir une Pull Request.
-
-
