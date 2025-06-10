@@ -1,7 +1,3 @@
-Okay, j'ai repéré les sections où le formatage Markdown a été un peu perturbé par les blocs de code et les commentaires IGNORE_WHEN_COPYING. Je vais nettoyer ça et m'assurer que les blocs de code sont correctement formatés en Markdown.
-
-Voici la version corrigée et nettoyée :
-
 # YOLO Annotator Pro - Advanced ML Suite
 
 
