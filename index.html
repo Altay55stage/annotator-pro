@@ -98,8 +98,16 @@
         .annotation-tools-column { flex: 1; min-width: 250px; }
         .image-preview-container { position: relative; width: 100%; min-height: 300px; max-height: 70vh; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; background-color: var(--subtle-bg); border-radius: 8px; overflow: hidden; }
         #uploadedImageDisplay { max-width: 100%; max-height: 100%; display: none; object-fit: contain; cursor: default; }
-        #overlayCanvas { position: absolute; top:0; left:0; pointer-events: none; }
-        .image-preview-container.drawing-mode #uploadedImageDisplay { cursor: crosshair; }
+        
+        /* --- CORRECTION CRITIQUE 1 --- */
+        /* La ligne "pointer-events: none;" a été supprimée pour permettre le dessin sur le canevas. */
+        #overlayCanvas { 
+            position: absolute; 
+            top:0; 
+            left:0; 
+        }
+        
+        .image-preview-container.drawing-mode { cursor: crosshair; } /* Modifié pour appliquer sur le container */
         #imagePlaceholderText { color: var(--secondary-text-color); font-size: 1em; text-align: center; }
         .class-label-input-container { position: absolute; background: white; border: 1px solid #ccc; padding: 8px; box-shadow: 2px 2px 8px rgba(0,0,0,0.2); z-index: 1000; border-radius: 6px; display: flex; gap: 5px; }
         .class-label-input-container input { margin-bottom: 0; }
@@ -109,7 +117,7 @@
         .list-item { padding: 10px; border-bottom: 1px solid var(--subtle-bg); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .list-item:last-child { border-bottom: none; }
         .list-item:hover { background-color: var(--subtle-bg); }
-        .list-item.selected { background-color: var(--primary-color) !important; color: var(--primary-text-color) !important; }
+        .list-item.selected { background-color: var(--primary-color) !important; color: var(--primary-text-color) !important; font-weight: 500; }
         .list-item.selected small { color: #e0e0e0 !important; }
         .list-item small { font-size: 0.8em; color: var(--secondary-text-color); }
 
@@ -135,6 +143,14 @@
         .task-progress-bar-container { height: 8px; background-color: var(--subtle-bg); border-radius: 4px; overflow: hidden; margin-top: 5px; }
         .task-progress-bar { height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.3s ease; }
 
+        /* --- AMÉLIORATION UX 3.2 --- */
+        /* Overlay de chargement global */
+        #loadingOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); z-index: 9999;
+            color: white; font-size: 1.5em;
+            justify-content: center; align-items: center;
+        }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
@@ -471,6 +487,11 @@
         <button id="cancelClassLabelBtn" class="action-button small secondary">X</button>
     </div>
 
+    <!-- --- AMÉLIORATION UX 3.2 (HTML) --- -->
+    <div id="loadingOverlay">
+        <span>Chargement en cours...</span>
+    </div>
+
     <script>
         // NGROK URL (ne pas toucher si c'est celle que tu utilises)
          API_BASE_URL = 'https://55f3-193-55-66-31.ngrok-free.app';
@@ -508,7 +529,8 @@
             }
         };
 
-        // --- Éléments DOM (sélectionnés au fur et à mesure ou dans les gestionnaires) ---
+        // --- Éléments DOM ---
+        const loadingOverlay = document.getElementById('loadingOverlay');
         // Header
         const apiStatusDot = document.getElementById('apiStatusDot');
         const apiStatusText = document.getElementById('apiStatusText');
@@ -645,6 +667,16 @@
             fetchAllModelsForSelects(); // Charger les modèles de base et FT
             fetchProjectsForSelects();  // Charger les projets pour les dropdowns
         }
+        
+        // --- AMÉLIORATION UX 3.2 (JS) ---
+        function showLoadingOverlay(message = "Chargement en cours...") {
+            loadingOverlay.querySelector('span').textContent = message;
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoadingOverlay() {
+            loadingOverlay.style.display = 'none';
+        }
 
         function setupEventListeners() {
             // Navigation
@@ -728,9 +760,12 @@
         }
 
         // --- API & Logging ---
-        async function fetchApi(endpoint, options = {}, ngrokSkip = true, isRetry = false) {
+        // --- CORRECTION CRITIQUE 2 ---
+        // Le paramètre `ngrokSkip` a été retiré et la logique de l'en-tête a été simplifiée.
+        async function fetchApi(endpoint, options = {}, isRetry = false) {
             const headers = { ...(options.headers || {}) };
-            if (ngrokSkip && API_BASE_URL.includes("ngrok-free.app")) { // Seulement pour ngrok
+
+            if (API_BASE_URL.includes("ngrok-free.app")) {
                  headers['ngrok-skip-browser-warning'] = 'true';
             }
             if (options.body && typeof options.body !== 'string' && !(options.body instanceof FormData)) {
@@ -768,7 +803,7 @@
                 clearTimeout(timeoutId);
                 if (error.name === 'AbortError' && !isRetry) { // Timeout spécifique
                     logToAppConsole(`Timeout pour ${endpoint}. Nouvelle tentative...`, "API_ERROR");
-                    return fetchApi(endpoint, options, ngrokSkip, true); // Une seule nouvelle tentative
+                    return fetchApi(endpoint, options, true); // Une seule nouvelle tentative
                 }
                 logToAppConsole(`Erreur API: ${error.message} (Endpoint: ${endpoint})`, "API_ERROR");
                 updateApiStatus(false, error.message.substring(0,100));
@@ -1085,17 +1120,15 @@
             appState.baseModelsList.forEach(m => {
                 allModelOptions.push({
                     name: `Base: ${m.name}`,
-                    // Le serveur attend un chemin relatif à HOME_DIR ou un nom de fichier simple (si dans HOME_DIR)
-                    // ou un chemin absolu. `m.path` est déjà absolu.
-                    value: m.path, // Pour /load_model, le serveur s'attend à ce que `model_name` soit ce chemin
-                    pathForFinetune: m.name // Pour /finetune, base_model_path est le nom simple si dans HOME_DIR
+                    value: m.path,
+                    pathForFinetune: m.name
                 });
             });
             appState.finetunedRunsList.forEach(m => {
                 allModelOptions.push({
                     name: `FT: ${m.run_name} (${m.model_name_pt})`,
-                    value: m.model_path_abs, // Absolu pour /load_model
-                    pathForFinetune: m.model_path_relative_to_home // Relatif à HOME_DIR pour /finetune
+                    value: m.model_path_abs,
+                    pathForFinetune: m.model_path_relative_to_home
                 });
             });
 
@@ -1110,12 +1143,12 @@
             const selectedOption = modelSelect.options[modelSelect.selectedIndex];
             if (!selectedOption || !selectedOption.value) { logToAppConsole('Veuillez sélectionner un modèle.', 'WARNING'); return; }
 
-            const modelPathToLoad = selectedOption.value; // C'est le chemin absolu ou le nom que le serveur comprendra
+            const modelPathToLoad = selectedOption.value;
             const modelNameDisplayed = selectedOption.text;
 
             logToAppConsole(`Chargement du modèle: ${modelNameDisplayed}...`, 'API_CALL');
             modelStatus.textContent = `Chargement de ${modelNameDisplayed.substring(0,30)}...`;
-            loadModelBtn.disabled = true;
+            showLoadingOverlay(`Chargement du modèle...`);
 
             try {
                 const result = await fetchApi('/load_model', { method: 'POST', body: { model_name: modelPathToLoad } });
@@ -1125,7 +1158,7 @@
                 modelStatus.textContent = "Erreur chargement modèle.";
                 logToAppConsole(`Erreur chargement modèle: ${error.message}`, 'API_ERROR');
             } finally {
-                loadModelBtn.disabled = false;
+                hideLoadingOverlay();
                 updateAnnotationButtonStates();
             }
         }
@@ -1136,43 +1169,37 @@
             if (!modelStatus.textContent.includes("Modèle chargé:")) { logToAppConsole("Veuillez charger un modèle.", "WARNING"); return; }
 
             logToAppConsole('Lancement de la prédiction...', 'API_CALL');
-            predictBtn.disabled = true;
-            appState.currentDetections = []; // Clear previous detections from this image
+            showLoadingOverlay('Prédiction en cours...');
+            appState.currentDetections = []; // Clear previous detections
             appState.selectedBoxId = null;
 
             const formData = new FormData();
             formData.append('file', appState.currentImageFile);
 
             const params = new URLSearchParams({
-                confidence: confidenceInput.value,
-                img_size: imgSizePredInput.value,
-                nms_iou: nmsIouInput.value,
-                device: deviceSelectPred.value,
-                use_sahi: useSahiCheckbox.checked,
-                sahi_slice_height: sahiSliceHeightInput.value,
-                sahi_slice_width: sahiSliceWidthInput.value,
-                sahi_overlap_height_ratio: sahiOverlapHeightInput.value,
-                sahi_overlap_width_ratio: sahiOverlapWidthInput.value,
+                confidence: confidenceInput.value, img_size: imgSizePredInput.value, nms_iou: nmsIouInput.value,
+                device: deviceSelectPred.value, use_sahi: useSahiCheckbox.checked,
+                sahi_slice_height: sahiSliceHeightInput.value, sahi_slice_width: sahiSliceWidthInput.value,
+                sahi_overlap_height_ratio: sahiOverlapHeightInput.value, sahi_overlap_width_ratio: sahiOverlapWidthInput.value,
             });
 
             try {
-                const result = await fetchApi(`/predict?${params.toString()}`, { method: 'POST', body: formData }, API_BASE_URL.includes("ngrok-free.app"), false); // ngrokSkip=false for FormData
+                // Appel API corrigé sans le paramètre `ngrokSkip`
+                const result = await fetchApi(`/predict?${params.toString()}`, { method: 'POST', body: formData });
                 logToAppConsole(`Prédiction terminée: ${result.detections.length} objets trouvés. Image serveur ID: ${result.image_id}`, 'API_SUCCESS');
-                appState.tempServerImageId = result.image_id; // Store server temp image ID
+                appState.tempServerImageId = result.image_id;
                 appState.tempServerImageOriginalFilename = result.original_filename;
 
                 appState.currentDetections = result.detections.map(det => ({
-                    id: generateUUID(),
-                    box: det.box, // {x1, y1, x2, y2} - assume these are already image original coordinates
-                    label: det.label,
-                    confidence: det.confidence,
-                    source: 'model'
+                    id: generateUUID(), box: det.box, label: det.label,
+                    confidence: det.confidence, source: 'model'
                 }));
                 drawAnnotations();
             } catch (error) {
                 logToAppConsole(`Erreur de prédiction: ${error.message}`, 'API_ERROR');
                 appState.tempServerImageId = null;
             } finally {
+                hideLoadingOverlay();
                 updateAnnotationButtonStates();
             }
         }
@@ -1180,7 +1207,7 @@
         async function handleDescribeLlm() {
             if (!appState.currentImageFile) { logToAppConsole("Veuillez charger une image.", "WARNING"); return; }
             logToAppConsole('Demande de description LLM...', 'API_CALL');
-            describeLlmBtn.disabled = true;
+            showLoadingOverlay('Description LLM en cours...');
             llmDescriptionOutputContainer.style.display = 'block';
             llmDescriptionOutput.textContent = 'En cours de description...';
 
@@ -1189,16 +1216,21 @@
                 reader.readAsDataURL(appState.currentImageFile);
                 reader.onloadend = async () => {
                     const base64Image = reader.result.split(',')[1];
-                    const result = await fetchApi('/describe_llm', { method: 'POST', body: { image_base64: base64Image, prompt: "Décris cette image de manière concise." } });
-                    llmDescriptionOutput.textContent = result.description;
-                    logToAppConsole('Description LLM reçue.', 'API_SUCCESS');
+                    try {
+                         const result = await fetchApi('/describe_llm', { method: 'POST', body: { image_base64: base64Image, prompt: "Décris cette image de manière concise." } });
+                         llmDescriptionOutput.textContent = result.description;
+                         logToAppConsole('Description LLM reçue.', 'API_SUCCESS');
+                    } catch (error) {
+                         logToAppConsole(`Erreur LLM: ${error.message}`, 'API_ERROR');
+                         llmDescriptionOutput.textContent = `Erreur: ${error.message}`;
+                    } finally {
+                         hideLoadingOverlay();
+                    }
                 };
                 reader.onerror = () => { throw new Error("Erreur lecture fichier pour LLM."); }
-            } catch (error) {
-                logToAppConsole(`Erreur LLM: ${error.message}`, 'API_ERROR');
-                llmDescriptionOutput.textContent = `Erreur: ${error.message}`;
-            } finally {
-                 describeLlmBtn.disabled = false; // Réactiver après, même si échec
+            } catch(e) { // catch sync errors from reader setup
+                 logToAppConsole(`Erreur LLM setup: ${e.message}`, 'API_ERROR');
+                 hideLoadingOverlay();
             }
         }
 
@@ -1249,20 +1281,27 @@
                 document.querySelectorAll('.delete-project-btn-direct').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation(); // Important pour ne pas déclencher la sélection du projet
-                        handleDeleteProject(e.target.dataset.projectId, true); // true pour direct delete
+                        const projectId = e.target.closest('[data-project-id]').dataset.projectId;
+                        handleDeleteProject(projectId);
                     });
                 });
             }
             updateSelectedProjectDetailsCard(); // Mettre à jour la carte de détails si un projet est sélectionné
         }
 
+        // --- AMÉLIORATION UX 3.1 (Sélection sans scintillement) ---
         function handleProjectSelectionFromList(event) {
             const item = event.target.closest('.list-item');
             if (item && !event.target.classList.contains('delete-project-btn-direct')) {
                 const projectId = item.dataset.projectId;
                 if (appState.selectedProjectId !== projectId) {
+                    // Retirer 'selected' de l'ancien élément
+                    const oldSelectedItem = projectListContainer.querySelector('.list-item.selected');
+                    if (oldSelectedItem) oldSelectedItem.classList.remove('selected');
+                    // Ajouter 'selected' au nouvel élément
+                    item.classList.add('selected');
+
                     appState.selectedProjectId = projectId;
-                    renderProjectList(); // Re-render pour mettre à jour le style 'selected'
                     fetchProjectDetails(projectId);
                 }
             }
@@ -1274,17 +1313,15 @@
                 return;
             }
             logToAppConsole(`Chargement des détails du projet ${projectId}...`, "API_CALL");
-            selectedProjectDetailsCard.style.display = 'block'; // Afficher la carte pendant le chargement
-            if (!refreshStatsOnly) { // Si ce n'est pas juste un refresh de stats, vider les champs
+            selectedProjectDetailsCard.style.display = 'block';
+            if (!refreshStatsOnly) {
                 selectedProjectNameDisplay.textContent = "Chargement...";
-                // Vider les autres champs...
             }
             projectStatsContent.innerHTML = "Chargement des statistiques...";
 
             try {
                 const project = await fetchApi(`/finetune_projects/${projectId}`);
                 if (project) {
-                    // Mettre à jour l'objet dans appState.projects si trouvé
                     const index = appState.projects.findIndex(p => p.project_id === projectId);
                     if (index !== -1) appState.projects[index] = project; else appState.projects.push(project);
 
@@ -1304,7 +1341,6 @@
                     selectedProjectYamlPath.textContent = project.dataset_yaml_path ? project.dataset_yaml_path.replace(HOME_DIR_SERVER, "~/") : "Non généré";
                     selectedProjectIsSplit.textContent = project.is_split ? "Oui" : "Non";
 
-                    // Afficher les statistiques
                     if (project.stats) {
                         let statsHtml = `<ul>
                             <li><strong>Distribution des Classes:</strong>
@@ -1319,7 +1355,6 @@
                     } else {
                         projectStatsContent.innerHTML = "Statistiques non disponibles ou non calculées.";
                     }
-
                     logToAppConsole(`Détails du projet ${project.name} chargés.`, "API_SUCCESS");
                 } else {
                     selectedProjectDetailsCard.style.display = 'none';
@@ -1330,7 +1365,7 @@
                 projectStatsContent.innerHTML = "Erreur chargement statistiques.";
             }
         }
-        function updateSelectedProjectDetailsCard() { // Appelé après sélection ou modif liste
+        function updateSelectedProjectDetailsCard() { 
             if (appState.selectedProjectId) {
                 fetchProjectDetails(appState.selectedProjectId);
             } else {
@@ -1348,10 +1383,12 @@
                 const newProject = await fetchApi('/finetune_projects', { method: 'POST', body: { name, description } });
                 logToAppConsole(`Projet "${newProject.name}" (ID: ${newProject.project_id}) créé.`, 'API_SUCCESS');
                 newProjectNameInput.value = ''; newProjectDescInput.value = '';
-                fetchProjectsForDisplay(); // Mettre à jour la liste
-                appState.selectedProjectId = newProject.project_id; // Sélectionner le nouveau projet
-                renderProjectList(); // Re-render pour style
-                fetchProjectDetails(newProject.project_id); // Afficher détails
+                await fetchProjectsForDisplay(); // Mettre à jour la liste
+                
+                // Sélectionner le nouveau projet
+                const newItem = projectListContainer.querySelector(`[data-project-id="${newProject.project_id}"]`);
+                if(newItem) handleProjectSelectionFromList({ target: newItem });
+
             } catch (error) {
                 logToAppConsole(`Erreur création projet: ${error.message}`, 'API_ERROR');
             }
@@ -1415,7 +1452,6 @@
             logToAppConsole(`Export COCO pour projet ${appState.selectedProjectId}...`, "API_CALL");
             try {
                 const response = await fetchApi(`/finetune_projects/${appState.selectedProjectId}/export_coco`, { method: 'POST' });
-                // La réponse est l'objet Response lui-même pour le téléchargement
                 if (response && response.ok) {
                     const blob = await response.blob();
                     const contentDisposition = response.headers.get('content-disposition');
@@ -1441,7 +1477,7 @@
             }
         }
 
-        async function handleDeleteProject(projectId, isDirectDelete = false) {
+        async function handleDeleteProject(projectId) {
             const projectToDelete = appState.projects.find(p => p.project_id === projectId);
             if (!projectToDelete) { logToAppConsole("Projet non trouvé pour suppression.", "WARNING"); return; }
 
@@ -1464,10 +1500,7 @@
             if(!appState.selectedProjectId) return;
              logToAppConsole(`Mise à jour manuelle du YAML pour ${appState.selectedProjectId}...`, "API_CALL");
             try {
-                // Le backend `update_project_dataset_yaml` est appelé automatiquement après certaines actions.
-                // Cet appel explicite est pour forcer une regénération si besoin.
-                // Le backend ne retourne rien directement, mais met à jour les métadonnées du projet.
-                await fetchApi(`/finetune_projects/${appState.selectedProjectId}/update_yaml`, { method: 'POST' }); // Endpoint hypothétique pour forcer
+                await fetchApi(`/finetune_projects/${appState.selectedProjectId}/update_yaml`, { method: 'POST' }); 
                 logToAppConsole(`Demande de mise à jour YAML envoyée.`, 'API_SUCCESS');
                 fetchProjectDetails(appState.selectedProjectId); // Recharger les détails pour voir le chemin YAML mis à jour
             } catch (error) {
@@ -1476,13 +1509,14 @@
         }
 
         async function handleAddImageToProject() {
-            if (!appState.selectedProjectId) { logToAppConsole("Sélectionnez un projet cible.", "WARNING"); return; }
+            const projectId = targetProjectSelectForImage.value;
+            if (!projectId) { logToAppConsole("Sélectionnez un projet cible.", "WARNING"); return; }
             if (!appState.tempServerImageId) { logToAppConsole("Analysez d'abord une image pour obtenir un ID serveur.", "WARNING"); return; }
             if (appState.currentDetections.length === 0) { logToAppConsole("Aucune annotation à ajouter.", "WARNING"); return; }
 
             const targetSet = targetSetSelectForImage.value;
-            logToAppConsole(`Ajout de l'image au projet ${appState.selectedProjectId} (set: ${targetSet})...`, "API_CALL");
-            addImageToProjectBtn.disabled = true;
+            logToAppConsole(`Ajout de l'image au projet ${projectId} (set: ${targetSet})...`, "API_CALL");
+            showLoadingOverlay("Ajout de l'image au projet...");
 
             const payload = {
                 temp_image_id: appState.tempServerImageId,
@@ -1494,18 +1528,17 @@
             };
 
             try {
-                const updatedProject = await fetchApi(`/finetune_projects/${appState.selectedProjectId}/images`, { method: 'POST', body: payload });
+                const updatedProject = await fetchApi(`/finetune_projects/${projectId}/images`, { method: 'POST', body: payload });
                 logToAppConsole(`Image ajoutée au projet ${updatedProject.name}. Total: ${updatedProject.image_count}. Classes: ${updatedProject.classes.join(', ')}`, 'API_SUCCESS');
-                // Mettre à jour les détails du projet si c'est celui sélectionné
+                
                 if (appState.selectedProjectId === updatedProject.project_id) {
                     fetchProjectDetails(appState.selectedProjectId);
                 }
-                // Rafraîchir la liste des projets pour les selects (pour les comptes d'images)
                 fetchProjectsForSelects(true);
             } catch (error) {
                 logToAppConsole(`Erreur ajout image au projet: ${error.message}`, 'API_ERROR');
             } finally {
-                updateAnnotationButtonStates(); // Réactiver le bouton même en cas d'erreur
+                hideLoadingOverlay();
             }
         }
 
@@ -1517,14 +1550,14 @@
                 const div = document.createElement('div');
                 const label = document.createElement('label');
                 label.htmlFor = `ftAug_${key}`;
-                label.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + ":"; // Formatage du label
+                label.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + ":";
 
                 const input = document.createElement('input');
                 input.type = 'number';
                 input.id = `ftAug_${key}`;
                 input.name = key;
                 input.value = defaultValue;
-                // Définir step, min, max basés sur la nature du paramètre (simplifié ici)
+                
                 if (key.includes('hsv_') || key.includes('translate') || key.includes('scale') || key.includes('flip') || key.includes('mosaic') || key.includes('mixup') || key.includes('copy_paste')) {
                     input.step = 0.01; input.min = 0.0; input.max = 1.0;
                 } else if (key === 'degrees' || key === 'shear') {
@@ -1546,7 +1579,7 @@
             if (!projectId) { logToAppConsole("Sélectionnez un projet pour le fine-tuning.", "VALIDATION_ERROR"); return; }
             if (!baseModelOption || !baseModelOption.dataset.pathForFinetune) { logToAppConsole("Sélectionnez un modèle de base valide.", "VALIDATION_ERROR"); return; }
 
-            const baseModelPathForServer = baseModelOption.dataset.pathForFinetune; // Chemin relatif ou nom simple
+            const baseModelPathForServer = baseModelOption.dataset.pathForFinetune;
             const runName = ftRunNameInput.value.trim() || null;
 
             const augmentationsConfig = {};
@@ -1555,21 +1588,15 @@
             });
 
             const runConfig = {
-                epochs: parseInt(ftEpochsInput.value),
-                batch_size: parseInt(ftBatchSizeInput.value),
-                img_size: parseInt(ftImgSizeInput.value),
-                optimizer: ftOptimizerSelect.value,
-                lr0: parseFloat(ftLr0Input.value),
-                lrf: parseFloat(ftLrfInput.value),
-                device: ftDeviceSelect.value,
-                patience: parseInt(ftPatienceInput.value),
+                epochs: parseInt(ftEpochsInput.value), batch_size: parseInt(ftBatchSizeInput.value),
+                img_size: parseInt(ftImgSizeInput.value), optimizer: ftOptimizerSelect.value,
+                lr0: parseFloat(ftLr0Input.value), lrf: parseFloat(ftLrfInput.value),
+                device: ftDeviceSelect.value, patience: parseInt(ftPatienceInput.value),
                 augmentations: augmentationsConfig
             };
             const payload = {
-                project_id: projectId,
-                base_model_path: baseModelPathForServer,
-                run_config: runConfig,
-                run_name: runName,
+                project_id: projectId, base_model_path: baseModelPathForServer,
+                run_config: runConfig, run_name: runName,
                 save_period: parseInt(ftSavePeriodInput.value)
             };
 
@@ -1582,8 +1609,8 @@
                 const taskResult = await fetchApi('/finetune', { method: 'POST', body: payload });
                 logToAppConsole(`Tâche de fine-tuning [${taskResult.task_id}] démarrée. Statut: ${taskResult.status}`, 'API_SUCCESS');
                 finetuneTaskStatus.textContent = `Tâche ${taskResult.task_id.substring(0,8)}: ${taskResult.message}`;
-                addTaskToMonitor(taskResult); // Commencer à suivre cette tâche
-                navigateToPage('tasksPage'); // Optionnel: rediriger vers la page des tâches
+                addTaskToMonitor(taskResult); 
+                navigateToPage('tasksPage'); 
             } catch (error) {
                 logToAppConsole(`Erreur démarrage fine-tuning: ${error.message}`, 'API_ERROR');
                 finetuneTaskStatus.textContent = `Erreur: ${error.message}`;
@@ -1600,7 +1627,7 @@
                 const runs = await fetchApi('/finetuned_models');
                 appState.finetunedRunsList = runs || [];
                 renderFineTunedRunsList();
-                fetchAllModelsForSelects(); // Mettre à jour la liste globale des modèles
+                fetchAllModelsForSelects(); 
                 logToAppConsole(`${appState.finetunedRunsList.length} run(s) fine-tuné(s) chargé(s).`, "API_SUCCESS");
             } catch (error) {
                 logToAppConsole(`Erreur chargement runs fine-tunés: ${error.message}`, "API_ERROR");
@@ -1624,13 +1651,17 @@
             updateSelectedRunDetailsCard();
         }
 
+        // --- AMÉLIORATION UX 3.1 (Sélection sans scintillement) ---
         function handleRunSelectionFromList(event) {
             const item = event.target.closest('.list-item');
             if (item) {
                 const runName = item.dataset.runName;
                 if (appState.selectedRunName !== runName) {
+                    const oldSelectedItem = finetunedModelsListContainer.querySelector('.list-item.selected');
+                    if (oldSelectedItem) oldSelectedItem.classList.remove('selected');
+                    item.classList.add('selected');
+
                     appState.selectedRunName = runName;
-                    renderFineTunedRunsList(); // Re-render pour style
                     fetchRunDetails(runName);
                 }
             }
@@ -1640,7 +1671,6 @@
             logToAppConsole(`Chargement détails du run ${runName}...`, "API_CALL");
             selectedFtModelDetailsCard.style.display = 'block';
             ftRunNameDisplay.textContent = "Chargement...";
-            // Vider les autres champs...
             ftRunConfigUsed.textContent = ""; ftRunMetricsFinal.textContent = ""; ftRunArtifactsList.innerHTML = "";
 
             try {
@@ -1685,7 +1715,7 @@
             const notes = ftRunNotes.value;
             logToAppConsole(`Sauvegarde des notes pour run ${appState.selectedRunName}...`, "API_CALL");
             try {
-                await fetchApi(`/finetuned_models/${appState.selectedRunName}/notes`, {method: 'PUT', body: {notes: notes}}); // FastAPI attend { "notes": "..."}
+                await fetchApi(`/finetuned_models/${appState.selectedRunName}/notes`, {method: 'PUT', body: {notes: notes}});
                 logToAppConsole("Notes sauvegardées.", "API_SUCCESS");
             } catch(error) { logToAppConsole("Erreur sauvegarde notes: " + error.message, "API_ERROR"); }
         }
@@ -1693,26 +1723,20 @@
             const artifactUrl = `${API_BASE_URL}/finetuned_models/${runName}/artifacts/${artifactPath}`;
             logToAppConsole(`Affichage/Téléchargement artefact: ${artifactPath} de type ${artifactType}`, "INFO");
             if (artifactType === 'image' || artifactType === 'csv' || artifactType === 'config' || artifactType === 'log') {
-                // Pour les images, on pourrait les afficher dans un modal.
-                // Pour CSV/config/log, on peut les afficher dans le modal JSON ou ouvrir dans un nouvel onglet.
                 if (artifactType === 'image') {
-                    showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)}`, ''); // Vider le contenu
+                    showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)}`, '');
                     document.getElementById('jsonModalContent').innerHTML = `<img src="${artifactUrl}" style="max-width:100%; max-height:70vh;" alt="Artefact ${artifactPath}">`;
                 } else {
                      try {
-                        const response = await fetchApi(artifactUrl.replace(API_BASE_URL, ''), {}, API_BASE_URL.includes("ngrok-free.app"), false); // Pas de ngrokSkip si pas FormData
+                        const response = await fetchApi(artifactUrl.replace(API_BASE_URL, ''));
                         const textContent = await response.text();
                         showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)} (${artifactType})`, textContent);
                     } catch (error) {
                         logToAppConsole("Erreur chargement artefact: " + error.message, "API_ERROR");
-                        // Fallback: ouvrir directement, le navigateur gérera peut-être
                         window.open(artifactUrl, '_blank');
                     }
                 }
-            } else if (artifactType === 'tensorboard_logs') {
-                 logToAppConsole(`Pour visualiser les logs TensorBoard, lancez TensorBoard localement pointant vers le dossier du run sur le serveur (ou son équivalent si vous téléchargez les logs). Chemin sur serveur (relatif à HOME): ${HOME_DIR_SERVER}${FINETUNED_MODELS_OUTPUT_DIR.replace(HOME_DIR_SERVER, "")}/${runName}`, "INFO");
-                 // On pourrait aussi zipper et télécharger le dossier des events.
-            } else { // Pour d'autres types, tenter un téléchargement direct
+            } else {
                 window.open(artifactUrl, '_blank');
             }
         }
@@ -1736,7 +1760,6 @@
                 logToAppConsole(`Tâche d'export [${taskResult.task_id}] démarrée. Format: ${format}`, "API_SUCCESS");
                 exportModelTaskStatus.textContent = `Tâche ${taskResult.task_id.substring(0,8)}: ${taskResult.message}`;
                 addTaskToMonitor(taskResult);
-                //navigateToPage('tasksPage'); // Optionnel
             } catch(error) {
                 logToAppConsole("Erreur lancement export: " + error.message, "API_ERROR");
                 exportModelTaskStatus.textContent = "Erreur: " + error.message;
@@ -1745,19 +1768,43 @@
                 exportTrainedModelBtn.disabled = false;
             }
         }
+        
+        // --- AMÉLIORATION 4 (Téléchargement Robuste) ---
         async function handleDownloadSelectedPtModel() {
             if (!appState.selectedRunName) { logToAppConsole("Aucun run sélectionné.", "WARNING"); return; }
             const run = appState.finetunedRunsList.find(r => r.run_name === appState.selectedRunName);
             if (!run || !run.model_path_relative_to_home) { logToAppConsole("Chemin du modèle .pt non trouvé.", "ERROR"); return; }
 
+            const pathB64 = btoa(unescape(encodeURIComponent(run.model_path_relative_to_home)))
+                                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const downloadUrl = `/download_model/${pathB64}`;
+            
+            logToAppConsole(`Téléchargement de ${run.model_name_pt} demandé...`, "INFO");
+            showLoadingOverlay('Préparation du téléchargement...');
+            
             try {
-                // Le chemin est relatif à HOME_DIR, il faut l'encoder en b64 url-safe
-                const pathB64 = btoa(unescape(encodeURIComponent(run.model_path_relative_to_home)))
-                                 .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-                window.location.href = `${API_BASE_URL}/download_model/${pathB64}`;
-                logToAppConsole(`Téléchargement de ${run.model_name_pt} demandé...`, "INFO");
-            } catch (e) {
-                logToAppConsole("Erreur encodage chemin pour téléchargement: " + e, "ERROR");
+                const response = await fetchApi(downloadUrl);
+                if (!response.ok) {
+                    throw new Error(`Le serveur a répondu avec le statut ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = run.model_name_pt;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+                logToAppConsole("Téléchargement démarré.", "SUCCESS");
+
+            } catch (error) {
+                logToAppConsole(`Erreur lors du téléchargement du modèle: ${error.message}`, "API_ERROR");
+                alert(`Impossible de télécharger le modèle: ${error.message}`);
+            } finally {
+                hideLoadingOverlay();
             }
         }
 
@@ -1771,22 +1818,15 @@
             const baseModelPathForServer = baseModelOption.dataset.pathForFinetune;
             const numTrials = parseInt(hpoNumTrialsInput.value);
 
-            // Config de base pour HPO
             const baseRunConfig = {
-                epochs: parseInt(hpoBaseEpochsInput.value),
-                batch_size: parseInt(hpoBaseBatchSizeInput.value),
-                img_size: parseInt(hpoBaseImgSizeInput.value),
-                optimizer: hpoBaseOptimizerSelect.value,
-                device: hpoBaseDeviceSelect.value,
-                // Les autres paramètres (LR0, LRF, augmentations) seront ceux par défaut de FineTuneRunConfig ou tunés par YOLO
-                augmentations: appState.defaultAugmentationSettings // Utiliser les augs par défaut comme base
+                epochs: parseInt(hpoBaseEpochsInput.value), batch_size: parseInt(hpoBaseBatchSizeInput.value),
+                img_size: parseInt(hpoBaseImgSizeInput.value), optimizer: hpoBaseOptimizerSelect.value,
+                device: hpoBaseDeviceSelect.value, augmentations: appState.defaultAugmentationSettings
             };
 
             const payload = {
-                project_id: projectId,
-                base_model_path: baseModelPathForServer,
-                base_run_config: baseRunConfig,
-                num_trials: numTrials
+                project_id: projectId, base_model_path: baseModelPathForServer,
+                base_run_config: baseRunConfig, num_trials: numTrials
             };
 
             logToAppConsole(`Lancement HPO pour projet ${projectId} (${numTrials} essais)...`, "API_CALL");
@@ -1799,7 +1839,7 @@
                 logToAppConsole(`Tâche HPO [${taskResult.task_id}] démarrée. Statut: ${taskResult.status}`, 'API_SUCCESS');
                 hpoTaskStatus.textContent = `Tâche ${taskResult.task_id.substring(0,8)}: ${taskResult.message}`;
                 addTaskToMonitor(taskResult);
-                //navigateToPage('tasksPage');
+                navigateToPage('tasksPage');
             } catch (error) {
                 logToAppConsole(`Erreur démarrage HPO: ${error.message}`, 'API_ERROR');
                 hpoTaskStatus.textContent = `Erreur: ${error.message}`;
@@ -1816,10 +1856,9 @@
         function startPeriodicTaskRefresh() {
             if (periodicTaskRefreshIntervalId) clearInterval(periodicTaskRefreshIntervalId);
             periodicTaskRefreshIntervalId = setInterval(async () => {
-                if (appState.currentPage === 'tasksPage') { // Rafraîchir seulement si la page est active
+                if (appState.currentPage === 'tasksPage') { 
                     await fetchAllTasks();
                 }
-                // Mettre à jour le statut des tâches actives en monitoring même si pas sur la page des tâches
                 await refreshMonitoredTasksStatus();
             }, TASK_REFRESH_INTERVAL);
         }
@@ -1828,17 +1867,16 @@
             logToAppConsole("Chargement de la liste des tâches...", "API_CALL");
             if(tasksListContainer) tasksListContainer.innerHTML = "Chargement des tâches...";
             try {
-                const tasks = await fetchApi('/finetune_tasks'); // Endpoint qui liste toutes les tâches
+                const tasks = await fetchApi('/finetune_tasks'); 
                 appState.allTasksHistory = tasks || [];
                 renderTasksList();
                 logToAppConsole(`${appState.allTasksHistory.length} tâche(s) récupérée(s).`, "API_SUCCESS");
-                // Synchroniser les tâches actives avec la liste complète
                 appState.allTasksHistory.forEach(task => {
                     if (appState.activeTasks[task.task_id] && (task.status === 'completed' || task.status === 'error')) {
-                        removeTaskFromMonitor(task.task_id); // Arrêter le suivi si terminée ou erreur
+                        removeTaskFromMonitor(task.task_id);
                     } else if (task.status === 'running' || task.status === 'pending') {
-                        if (!appState.activeTasks[task.task_id]) { // Si elle n'est pas déjà suivie (ex: après rechargement page)
-                             addTaskToMonitor(task, false); // false pour ne pas refaire un appel API immédiat
+                        if (!appState.activeTasks[task.task_id]) {
+                             addTaskToMonitor(task, false);
                         }
                     }
                 });
@@ -1849,7 +1887,7 @@
         }
 
         function renderTasksList() {
-            if (!tasksListContainer) return; // Si la page n'est pas active/l'élément n'existe pas
+            if (!tasksListContainer) return;
             if (appState.allTasksHistory.length === 0) {
                 tasksListContainer.innerHTML = "<div style='padding:10px; text-align:center; color:var(--secondary-text-color);'>Aucune tâche à afficher.</div>";
                 return;
@@ -1886,7 +1924,7 @@
             appState.activeTasks[taskData.task_id] = { taskData: taskData };
             logToAppConsole(`Suivi démarré pour tâche ${taskData.task_id}.`, "TASK_MONITOR");
 
-            if (fetchInitialStatus) { // Pour les nouvelles tâches, vérifier le statut une fois de suite
+            if (fetchInitialStatus) { 
                 checkSingleTaskStatus(taskData.task_id);
             }
         }
@@ -1906,19 +1944,15 @@
             try {
                 const task = await fetchApi(`/finetune_tasks/${taskId}`);
                 if (task) {
-                    // Mettre à jour dans la liste globale allTasksHistory si elle existe
                     const indexInHistory = appState.allTasksHistory.findIndex(t => t.task_id === taskId);
                     if (indexInHistory !== -1) {
                         appState.allTasksHistory[indexInHistory] = task;
-                    } else { // Si elle n'y était pas, l'ajouter
-                        appState.allTasksHistory.unshift(task); // Ajouter au début
+                    } else { 
+                        appState.allTasksHistory.unshift(task);
                     }
 
-                    // Mettre à jour la tâche dans activeTasks (pour la prochaine itération de refreshMonitored)
                     if (appState.activeTasks[taskId]) appState.activeTasks[taskId].taskData = task;
-
-
-                    // Mettre à jour les divs de statut spécifiques si elles existent (ex: finetuneTaskStatus)
+                    
                     if (task.task_type === 'finetune' && finetuneTaskStatus) {
                         finetuneTaskStatus.textContent = `Tâche ${task.task_id.substring(0,8)}: ${task.message} (${(task.progress * 100).toFixed(1)}%)`;
                         finetuneTaskStatus.className = `status-text status ${task.status.toLowerCase()}`;
@@ -1936,10 +1970,9 @@
                         removeTaskFromMonitor(taskId);
                         if (task.status === 'completed') {
                             if (task.task_type === 'finetune' || task.task_type === 'hpo_tune') {
-                                fetchFineTunedRuns(); // Rafraîchir la liste des modèles FT
-                                fetchAllModelsForSelects(true); // Rafraîchir tous les selects de modèles
+                                fetchFineTunedRuns(); 
+                                fetchAllModelsForSelects(true);
                             } else if (task.task_type.startsWith('export_')) {
-                                // Rafraîchir les artefacts du run source si possible
                                 const runNameSource = task.result?.run_name_source;
                                 if (runNameSource && runNameSource === appState.selectedRunName) {
                                     fetchRunDetails(runNameSource);
@@ -1947,17 +1980,14 @@
                             }
                         }
                     }
-                     // Si la page des tâches est active, la re-render
                     if (appState.currentPage === 'tasksPage') renderTasksList();
                 }
             } catch (error) {
                 logToAppConsole(`Erreur vérification statut tâche ${taskId}: ${error.message}`, 'API_ERROR');
-                // Ne pas arrêter le suivi sur des erreurs réseau ponctuelles
             }
         }
 
         // --- Utilitaires Globaux ---
-        // Pour Path.basename simple
         const Path = { basename: (p) => String(p).split(/[\\/]/).pop() };
 
     </script>
