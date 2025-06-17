@@ -27,12 +27,12 @@
         .nav-item { display: block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-left: 3px solid transparent; }
         .nav-item:hover { background-color: var(--subtle-bg); }
         .nav-item.active { background-color: var(--primary-color); color: var(--primary-text-color); border-left-color: var(--primary-color); font-weight: 500; }
-        .nav-item i { margin-right: 8px; width: 18px; text-align: center; } /* Pour les icônes FontAwesome par exemple */
+        .nav-item i { margin-right: 8px; width: 18px; text-align: center; }
 
         .main-content-area {
             flex-grow: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch;
             margin-left: var(--sidebar-width); margin-top: var(--header-height);
-            height: calc(100vh - var(--header-height)); /* S'assurer que le contenu principal prend toute la hauteur dispo */
+            height: calc(100vh - var(--header-height));
         }
         .app-header-bar {
             background-color: var(--card-bg-color); color: var(--text-color); height: var(--header-height);
@@ -44,8 +44,7 @@
         .status-dot { height: 10px; width: 10px; background-color: var(--danger-color); border-radius: 50%; display: inline-block; margin-right: 5px; }
         .status-dot.connected { background-color: var(--success-color); }
 
-
-        .page-section { display: none; /* Caché par défaut, géré par JS */ }
+        .page-section { display: none; }
         .page-section.active { display: block; }
         .page-title { font-size: 1.5em; font-weight: 600; margin-bottom: 20px; color: var(--text-color); }
 
@@ -64,7 +63,6 @@
         .input-group label { margin-bottom: 0; }
         .input-group > * { flex: 1; }
         .input-group > button { flex-grow: 0; height: 40px; }
-
 
         .checkbox-container { display: flex; align-items: center; margin-bottom: 15px; }
         input[type="checkbox"] { margin-right: 8px; width: 18px; height: 18px; accent-color: var(--primary-color); }
@@ -92,27 +90,17 @@
         .log-output { background-color: #1e1e1e; color: #d4d4d4; border-radius: 6px; padding: 15px; font-size: 0.85em; white-space: pre-wrap; word-wrap: break-word; max-height: 200px; overflow-y: auto; font-family: "Consolas", "Monaco", monospace; margin-top: 10px; }
         .status-text { font-size: 0.9em; color: var(--secondary-text-color); margin-top: 8px; min-height: 1.3em; }
 
-        /* Image Annotation Specifics */
         .image-annotation-area { display: flex; gap: 20px; flex-wrap: wrap; }
         .image-display-column { flex: 3; min-width: 300px; }
         .annotation-tools-column { flex: 1; min-width: 250px; }
         .image-preview-container { position: relative; width: 100%; min-height: 300px; max-height: 70vh; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; background-color: var(--subtle-bg); border-radius: 8px; overflow: hidden; }
         #uploadedImageDisplay { max-width: 100%; max-height: 100%; display: none; object-fit: contain; cursor: default; }
-        
-        /* --- CORRECTION CRITIQUE 1 --- */
-        /* La ligne "pointer-events: none;" a été supprimée pour permettre le dessin sur le canevas. */
-        #overlayCanvas { 
-            position: absolute; 
-            top:0; 
-            left:0; 
-        }
-        
-        .image-preview-container.drawing-mode { cursor: crosshair; } /* Modifié pour appliquer sur le container */
+        #overlayCanvas { position: absolute; top:0; left:0; }
+        .image-preview-container.drawing-mode { cursor: crosshair; }
         #imagePlaceholderText { color: var(--secondary-text-color); font-size: 1em; text-align: center; }
         .class-label-input-container { position: absolute; background: white; border: 1px solid #ccc; padding: 8px; box-shadow: 2px 2px 8px rgba(0,0,0,0.2); z-index: 1000; border-radius: 6px; display: flex; gap: 5px; }
         .class-label-input-container input { margin-bottom: 0; }
 
-        /* Project and Model Lists */
         .list-container { max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 10px; }
         .list-item { padding: 10px; border-bottom: 1px solid var(--subtle-bg); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .list-item:last-child { border-bottom: none; }
@@ -121,10 +109,8 @@
         .list-item.selected small { color: #e0e0e0 !important; }
         .list-item small { font-size: 0.8em; color: var(--secondary-text-color); }
 
-        /* Grid for augmentations / parameters */
         .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
 
-        /* Modals (simple example) */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
         .modal-content { background-color: var(--card-bg-color); margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; position: relative; }
         .modal-header { padding-bottom: 10px; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
@@ -132,7 +118,6 @@
         .close-modal-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
         .close-modal-btn:hover, .close-modal-btn:focus { color: black; text-decoration: none; }
 
-        /* Task display */
         .task-item { border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-bottom: 10px; font-size: 0.9em; }
         .task-item strong { display: block; margin-bottom: 5px; }
         .task-item .status { font-weight: bold; }
@@ -143,8 +128,6 @@
         .task-progress-bar-container { height: 8px; background-color: var(--subtle-bg); border-radius: 4px; overflow: hidden; margin-top: 5px; }
         .task-progress-bar { height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.3s ease; }
 
-        /* --- AMÉLIORATION UX 3.2 --- */
-        /* Overlay de chargement global */
         #loadingOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.5); z-index: 9999;
@@ -152,27 +135,24 @@
             justify-content: center; align-items: center;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%; height: auto; position: static; box-shadow: none; border-right: none; border-bottom: 1px solid var(--border-color);
                 padding-top: 0; overflow-y: visible;
             }
-            .sidebar-header { display: none; } /* Cacher le header du sidebar, le titre est dans la barre principale */
-            .main-content-area { margin-left: 0; margin-top: 0; height: calc(100vh - var(--header-height) - 50px); /* Hauteur de la barre de nav mobile */ }
-            .app-header-bar .title { display: none; } /* Cacher titre si sidebar devient une barre de nav */
-            .nav-group-title { display: none; } /* Moins de place sur mobile */
+            .sidebar-header { display: none; }
+            .main-content-area { margin-left: 0; margin-top: 0; height: calc(100vh - var(--header-height) - 50px); }
+            .app-header-bar .title { display: none; }
+            .nav-group-title { display: none; }
             .nav-item { text-align: center; border-left: none; border-bottom: 3px solid transparent; padding: 12px 5px; }
             .nav-item.active { border-bottom-color: var(--primary-color); background-color: var(--primary-color); }
-            .sidebar .navigation-items { display: flex; overflow-x: auto; } /* Pour faire défiler les items horizontalement */
+            .sidebar .navigation-items { display: flex; overflow-x: auto; }
 
             .image-annotation-area { flex-direction: column; }
-            .main-layout-desktop { flex-direction: column; } /* Si on utilise main-layout-desktop pour les pages */
+            .main-layout-desktop { flex-direction: column; }
             .column { min-width: 100% !important; }
         }
     </style>
-    <!-- Pour les icônes, si vous utilisez FontAwesome par exemple -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
 </head>
 <body>
     <div class="app-container">
@@ -441,7 +421,6 @@
                                 <div><label>Optimiseur:</label> <select id="hpoBaseOptimizer"><option value="auto">Auto</option><option value="SGD">SGD</option><option value="AdamW">AdamW</option></select></div>
                                 <div><label>Device:</label> <select id="hpoBaseDevice"><option value="cuda">CUDA</option><option value="cpu">CPU</option></select></div>
                             </div>
-                             <!-- Les paramètres d'augmentation de base pourraient aussi être configurés ici -->
                         </div>
                     </details>
                     <button id="startHpoBtn" class="action-button" style="margin-top:15px;">Lancer Optimisation HPO</button>
@@ -456,7 +435,6 @@
             <section id="tasksPage" class="page-section">
                 <h1 class="page-title">Gestionnaire de Tâches en Arrière-Plan <button id="refreshTasksBtn" class="action-button small secondary" style="float:right;">Rafraîchir</button></h1>
                 <div id="tasksListContainer">
-                    <!-- Liste des tâches actives et récentes -->
                 </div>
             </section>
 
@@ -469,7 +447,6 @@
         </main>
     </div>
 
-    <!-- Modal pour afficher les détails JSON ou les métriques -->
     <div id="jsonModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -480,48 +457,29 @@
         </div>
     </div>
 
-    <!-- Pour le popup de saisie de label de classe -->
     <div id="classLabelInputContainer" class="class-label-input-container" style="display:none;">
         <input type="text" id="classLabelInput" placeholder="Nom de la classe">
         <button id="confirmClassLabelBtn" class="action-button small">OK</button>
         <button id="cancelClassLabelBtn" class="action-button small secondary">X</button>
     </div>
 
-    <!-- --- AMÉLIORATION UX 3.2 (HTML) --- -->
     <div id="loadingOverlay">
         <span>Chargement en cours...</span>
     </div>
 
     <script>
-        // NGROK URL (ne pas toucher si c'est celle que tu utilises)
-         API_BASE_URL = 'https://55f3-193-55-66-31.ngrok-free.app';
-        const HOME_DIR_SERVER = "/home/acevik/"; // Important pour certains chemins relatifs
+        API_BASE_URL = 'https://55f3-193-55-66-31.ngrok-free.app';
+        const HOME_DIR_SERVER = "/home/acevik/";
 
-        // --- State Global du Frontend ---
         let appState = {
-            currentPage: 'annotationPage',
-            apiConnected: false,
-            currentImageFile: null,
+            currentPage: 'annotationPage', apiConnected: false, currentImageFile: null,
             originalImageWidth: 0, originalImageHeight: 0,
-            currentDetections: [], // { id, box, label, confidence, source ('model' ou 'manual') }
-            selectedBoxId: null,
-            isDrawingMode: false,
-            isMouseDownOnCanvas: false,
-            canvasStartCoords: { x: 0, y: 0 },
-            currentDrawingRect: null, // { x1, y1, x2, y2 } en coords image originales
-            tempServerImageId: null, // Reçu après /predict, utilisé pour /add_image_to_project
-            tempServerImageOriginalFilename: null,
-
-            projects: [], // Liste des objets ProjectInfo
-            selectedProjectId: null,
-            baseModelsList: [], // Liste des modèles .pt de base
-            finetunedRunsList: [], // Liste des objets FineTunedModelInfo
-            selectedRunName: null, // Pour afficher les détails d'un run
-
-            activeTasks: {}, // { taskId: { intervalId: id, ...taskData } }
-            allTasksHistory: [], // Pour afficher toutes les tâches récupérées
-
-            // Default Augmentation Config (correspond à FineTuneAugmentationConfig du backend)
+            currentDetections: [], selectedBoxId: null, isDrawingMode: false,
+            isMouseDownOnCanvas: false, canvasStartCoords: { x: 0, y: 0 },
+            currentDrawingRect: null, tempServerImageId: null,
+            tempServerImageOriginalFilename: null, projects: [],
+            selectedProjectId: null, baseModelsList: [], finetunedRunsList: [],
+            selectedRunName: null, activeTasks: {}, allTasksHistory: [],
             defaultAugmentationSettings: {
                 hsv_h: 0.015, hsv_s: 0.7, hsv_v: 0.4, degrees: 0.0, translate: 0.1,
                 scale: 0.5, shear: 0.0, perspective: 0.0, flipud: 0.0, fliplr: 0.5,
@@ -529,12 +487,9 @@
             }
         };
 
-        // --- Éléments DOM ---
         const loadingOverlay = document.getElementById('loadingOverlay');
-        // Header
         const apiStatusDot = document.getElementById('apiStatusDot');
         const apiStatusText = document.getElementById('apiStatusText');
-        // Annotation Page
         const imageUploadInput = document.getElementById('imageUpload');
         const fileNameDisplay = document.getElementById('fileNameDisplay');
         const uploadedImageDisplay = document.getElementById('uploadedImageDisplay');
@@ -569,7 +524,6 @@
         const classLabelInput = document.getElementById('classLabelInput');
         const confirmClassLabelBtn = document.getElementById('confirmClassLabelBtn');
         const cancelClassLabelBtn = document.getElementById('cancelClassLabelBtn');
-        // Projects Page
         const newProjectNameInput = document.getElementById('newProjectName');
         const newProjectDescInput = document.getElementById('newProjectDesc');
         const createProjectBtn = document.getElementById('createProjectBtn');
@@ -578,7 +532,16 @@
         const selectedProjectDetailsCard = document.getElementById('selectedProjectDetailsCard');
         const selectedProjectNameDisplay = document.getElementById('selectedProjectNameDisplay');
         const selectedProjectIdDisplay = document.getElementById('selectedProjectIdDisplay');
-        // ... autres spans pour détails projet
+        const selectedProjectCreatedAt = document.getElementById('selectedProjectCreatedAt');
+        const selectedProjectDescDisplay = document.getElementById('selectedProjectDescDisplay');
+        const selectedProjectTotalImages = document.getElementById('selectedProjectTotalImages');
+        const selectedProjectTrainImages = document.getElementById('selectedProjectTrainImages');
+        const selectedProjectValImages = document.getElementById('selectedProjectValImages');
+        const selectedProjectTestImages = document.getElementById('selectedProjectTestImages');
+        const selectedProjectAnnotationCount = document.getElementById('selectedProjectAnnotationCount');
+        const selectedProjectClasses = document.getElementById('selectedProjectClasses');
+        const selectedProjectYamlPath = document.getElementById('selectedProjectYamlPath');
+        const selectedProjectIsSplit = document.getElementById('selectedProjectIsSplit');
         const updateProjectNameInput = document.getElementById('updateProjectNameInput');
         const updateProjectNameBtn = document.getElementById('updateProjectNameBtn');
         const updateProjectDescInput = document.getElementById('updateProjectDescInput');
@@ -594,8 +557,6 @@
         const updateProjectYamlBtn = document.getElementById('updateProjectYamlBtn');
         const projectStatsContent = document.getElementById('projectStatsContent');
         const refreshProjectStatsBtn = document.getElementById('refreshProjectStatsBtn');
-
-        // Fine-tuning Page (Training Runs)
         const ftProjectSelect = document.getElementById('ftProjectSelect');
         const ftBaseModelSelect = document.getElementById('ftBaseModelSelect');
         const ftRunNameInput = document.getElementById('ftRunName');
@@ -614,10 +575,14 @@
         const refreshFtModelsBtn = document.getElementById('refreshFtModelsBtn');
         const finetunedModelsListContainer = document.getElementById('finetunedModelsListContainer');
         const selectedFtModelDetailsCard = document.getElementById('selectedFtModelDetailsCard');
-        // ... spans pour détails run
         const ftRunNameDisplay = document.getElementById('ftRunNameDisplay');
         const ftModelPtName = document.getElementById('ftModelPtName');
-        // ...
+        const ftRunProjectId = document.getElementById('ftRunProjectId');
+        const ftRunBaseModel = document.getElementById('ftRunBaseModel');
+        const ftRunDate = document.getElementById('ftRunDate');
+        const ftRunBestEpoch = document.getElementById('ftRunBestEpoch');
+        const ftRunConfigUsed = document.getElementById('ftRunConfigUsed');
+        const ftRunMetricsFinal = document.getElementById('ftRunMetricsFinal');
         const ftRunNotes = document.getElementById('ftRunNotes');
         const saveFtRunNotesBtn = document.getElementById('saveFtRunNotesBtn');
         const ftRunArtifactsList = document.getElementById('ftRunArtifactsList');
@@ -628,8 +593,6 @@
         const exportTrainedModelBtn = document.getElementById('exportTrainedModelBtn');
         const exportModelTaskStatus = document.getElementById('exportModelTaskStatus');
         const downloadSelectedPtModelBtn = document.getElementById('downloadSelectedPtModelBtn');
-
-        // HPO Page
         const hpoProjectSelect = document.getElementById('hpoProjectSelect');
         const hpoBaseModelSelect = document.getElementById('hpoBaseModelSelect');
         const hpoNumTrialsInput = document.getElementById('hpoNumTrials');
@@ -640,35 +603,28 @@
         const hpoBaseDeviceSelect = document.getElementById('hpoBaseDevice');
         const startHpoBtn = document.getElementById('startHpoBtn');
         const hpoTaskStatus = document.getElementById('hpoTaskStatus');
-
-        // Tasks Page
         const refreshTasksBtn = document.getElementById('refreshTasksBtn');
         const tasksListContainer = document.getElementById('tasksListContainer');
-        // Logs Page
         const appLogOutput = document.getElementById('appLogOutput');
-        // Modal
         const jsonModal = document.getElementById('jsonModal');
         const jsonModalTitle = document.getElementById('jsonModalTitle');
         const jsonModalContent = document.getElementById('jsonModalContent');
 
-
-        // --- Initialisation ---
         document.addEventListener('DOMContentLoaded', () => {
             initApp();
             setupEventListeners();
             checkApiStatus();
             populateAugmentationInputs();
-            startPeriodicTaskRefresh(); // Démarrer le rafraîchissement périodique des tâches
+            startPeriodicTaskRefresh();
         });
 
         function initApp() {
             logToAppConsole("Application initialisée. Bienvenue !", "SYSTEM");
-            navigateToPage(appState.currentPage); // Afficher la page par défaut
-            fetchAllModelsForSelects(); // Charger les modèles de base et FT
-            fetchProjectsForSelects();  // Charger les projets pour les dropdowns
+            navigateToPage(appState.currentPage);
+            fetchAllModelsForSelects();
+            fetchProjectsForSelects();
         }
-        
-        // --- AMÉLIORATION UX 3.2 (JS) ---
+
         function showLoadingOverlay(message = "Chargement en cours...") {
             loadingOverlay.querySelector('span').textContent = message;
             loadingOverlay.style.display = 'flex';
@@ -679,7 +635,6 @@
         }
 
         function setupEventListeners() {
-            // Navigation
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -687,8 +642,6 @@
                     navigateToPage(pageId);
                 });
             });
-
-            // Annotation Page Listeners
             imageUploadInput.addEventListener('change', handleImageUpload);
             toggleDrawingModeBtn.addEventListener('click', handleToggleDrawingMode);
             deleteSelectedBoxBtn.addEventListener('click', handleDeleteSelectedBox);
@@ -706,21 +659,16 @@
             predictBtn.addEventListener('click', handlePredict);
             describeLlmBtn.addEventListener('click', handleDescribeLlm);
             addImageToProjectBtn.addEventListener('click', handleAddImageToProject);
-
-            // Projects Page Listeners
             createProjectBtn.addEventListener('click', handleCreateProject);
             refreshProjectsBtn.addEventListener('click', fetchProjectsForDisplay);
-            projectListContainer.addEventListener('click', handleProjectSelectionFromList); // Event delegation
+            projectListContainer.addEventListener('click', handleProjectSelectionFromList);
             updateProjectNameBtn.addEventListener('click', handleUpdateProjectName);
             updateProjectDescBtn.addEventListener('click', handleUpdateProjectDesc);
             splitDatasetBtn.addEventListener('click', handleSplitDataset);
             exportCocoBtn.addEventListener('click', handleExportCoco);
-            deleteProjectBtn.addEventListener('click', handleDeleteProject);
+            deleteProjectBtn.addEventListener('click', () => handleDeleteProject(appState.selectedProjectId));
             updateProjectYamlBtn.addEventListener('click', handleUpdateProjectYaml);
             refreshProjectStatsBtn.addEventListener('click', () => { if(appState.selectedProjectId) fetchProjectDetails(appState.selectedProjectId, true); });
-
-
-            // Training Runs Page Listeners
             startFinetuneBtn.addEventListener('click', handleStartFinetune);
             refreshFtModelsBtn.addEventListener('click', fetchFineTunedRuns);
             finetunedModelsListContainer.addEventListener('click', handleRunSelectionFromList);
@@ -728,18 +676,11 @@
             refreshRunArtifactsBtn.addEventListener('click', () => { if(appState.selectedRunName) fetchRunDetails(appState.selectedRunName); });
             exportTrainedModelBtn.addEventListener('click', handleExportTrainedModel);
             downloadSelectedPtModelBtn.addEventListener('click', handleDownloadSelectedPtModel);
-
-            // HPO Page Listeners
             startHpoBtn.addEventListener('click', handleStartHpo);
-
-            // Tasks Page Listeners
             refreshTasksBtn.addEventListener('click', fetchAllTasks);
-
-            // General
             window.addEventListener('resize', () => { if (appState.currentImageFile) adjustCanvasAndDrawAnnotations(); });
         }
 
-        // --- Navigation ---
         function navigateToPage(pageId) {
             document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -748,23 +689,17 @@
             });
             appState.currentPage = pageId;
             logToAppConsole(`Navigation vers: ${pageId}`, "NAV");
-
-            // Actions spécifiques à la page
             if (pageId === 'projectsPage') fetchProjectsForDisplay();
             if (pageId === 'trainingRunsPage') fetchFineTunedRuns();
             if (pageId === 'tasksPage') fetchAllTasks();
             if (pageId === 'hpoPage' || pageId === 'trainingRunsPage') {
-                fetchProjectsForSelects(true); // Forcer refresh des projets dans les selects
-                fetchAllModelsForSelects(true); // Forcer refresh des modèles dans les selects
+                fetchProjectsForSelects(true);
+                fetchAllModelsForSelects(true);
             }
         }
 
-        // --- API & Logging ---
-        // --- CORRECTION CRITIQUE 2 ---
-        // Le paramètre `ngrokSkip` a été retiré et la logique de l'en-tête a été simplifiée.
         async function fetchApi(endpoint, options = {}, isRetry = false) {
             const headers = { ...(options.headers || {}) };
-
             if (API_BASE_URL.includes("ngrok-free.app")) {
                  headers['ngrok-skip-browser-warning'] = 'true';
             }
@@ -772,16 +707,12 @@
                 headers['Content-Type'] = 'application/json';
                 options.body = JSON.stringify(options.body);
             }
-
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 300000); // Timeout de 5 minutes
-
+            const timeoutId = setTimeout(() => controller.abort(), 300000);
             options.signal = controller.signal;
-
             try {
                 const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
                 clearTimeout(timeoutId);
-
                 if (!response.ok) {
                     let errorDetail = `Erreur API (${response.status}) pour ${endpoint}.`;
                     try {
@@ -790,24 +721,23 @@
                     } catch (e) { errorDetail = (await response.text()).substring(0,300); }
                     throw new Error(errorDetail);
                 }
-                if (response.status === 204) return null; // No Content
-
+                if (response.status === 204) return null;
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
                     return response.json();
                 } else if (contentType && (contentType.includes("application/octet-stream") || contentType.includes("application/zip") || contentType.includes("text/csv"))) {
-                    return response; // Renvoyer l'objet réponse pour le traitement des fichiers
+                    return response;
                 }
-                return response.text(); // Fallback pour d'autres types de contenu
+                return response.text();
             } catch (error) {
                 clearTimeout(timeoutId);
-                if (error.name === 'AbortError' && !isRetry) { // Timeout spécifique
+                if (error.name === 'AbortError' && !isRetry) {
                     logToAppConsole(`Timeout pour ${endpoint}. Nouvelle tentative...`, "API_ERROR");
-                    return fetchApi(endpoint, options, true); // Une seule nouvelle tentative
+                    return fetchApi(endpoint, options, true);
                 }
                 logToAppConsole(`Erreur API: ${error.message} (Endpoint: ${endpoint})`, "API_ERROR");
                 updateApiStatus(false, error.message.substring(0,100));
-                throw error; // Re-lancer pour que l'appelant puisse gérer
+                throw error;
             }
         }
 
@@ -835,8 +765,6 @@
             if (apiStatusText) apiStatusText.textContent = message || (isConnected ? "Connecté" : "Déconnecté");
         }
 
-
-        // --- Modals ---
         function showModal(modalId, title, content) {
             document.getElementById(modalId + 'Title').textContent = title;
             document.getElementById(modalId + 'Content').textContent = content;
@@ -846,12 +774,11 @@
             document.getElementById(modalId).style.display = "none";
         }
 
-        // --- Annotation & Image Handling ---
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 appState.currentImageFile = file;
-                appState.tempServerImageId = null; // Reset server image ID on new upload
+                appState.tempServerImageId = null;
                 appState.tempServerImageOriginalFilename = file.name;
                 fileNameDisplay.textContent = file.name.length > 35 ? file.name.substring(0,32) + "..." : file.name;
                 imagePlaceholderText.style.display = 'none';
@@ -898,8 +825,7 @@
 
         function updateAnnotationButtonStates() {
             const imageLoaded = !!appState.currentImageFile;
-            const modelLoaded = modelStatus.textContent.includes("Modèle chargé:"); // Simple check
-
+            const modelLoaded = modelStatus.textContent.includes("Modèle chargé:");
             toggleDrawingModeBtn.disabled = !imageLoaded;
             deleteSelectedBoxBtn.disabled = !appState.selectedBoxId;
             clearAllBoxesBtn.disabled = appState.currentDetections.length === 0;
@@ -925,29 +851,25 @@
             }
             ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             if (appState.currentDetections.length === 0 && !appState.currentDrawingRect) return;
-
             const scaleX = overlayCanvas.width / appState.originalImageWidth;
             const scaleY = overlayCanvas.height / appState.originalImageHeight;
             const defaultLineWidth = Math.max(1.5, Math.min(overlayCanvas.width, overlayCanvas.height) / 250);
             const fontSize = Math.max(10, defaultLineWidth * 7);
             ctx.font = `${fontSize}px Arial`;
-
             appState.currentDetections.forEach(det => {
                 ctx.beginPath();
                 const x1 = det.box.x1 * scaleX;
                 const y1 = det.box.y1 * scaleY;
                 const width = (det.box.x2 - det.box.x1) * scaleX;
                 const height = (det.box.y2 - det.box.y1) * scaleY;
-
                 if (det.id === appState.selectedBoxId) {
                     ctx.strokeStyle = 'blue'; ctx.lineWidth = defaultLineWidth + 1;
                 } else if (det.source === 'model') {
                     ctx.strokeStyle = 'red'; ctx.lineWidth = defaultLineWidth;
-                } else { // manual
+                } else {
                     ctx.strokeStyle = 'green'; ctx.lineWidth = defaultLineWidth;
                 }
                 ctx.strokeRect(x1, y1, width, height);
-
                 ctx.fillStyle = ctx.strokeStyle;
                 const labelText = det.label + (det.confidence ? ` (${det.confidence.toFixed(2)})` : '');
                 const textMetrics = ctx.measureText(labelText);
@@ -955,15 +877,12 @@
                 const textBgY = y1 > fontSize + 3 ? y1 - fontSize - 3 : y1 + 3;
                 const textBgWidth = textMetrics.width + 4;
                 const textBgHeight = fontSize + 4;
-
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; // Semi-transparent white background for text
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                 ctx.fillRect(textBgX, textBgY - fontSize + 2 , textBgWidth, textBgHeight);
-
-                ctx.fillStyle = ctx.strokeStyle; // Color of the text itself
+                ctx.fillStyle = ctx.strokeStyle;
                 ctx.fillText(labelText, x1 + 2, y1 > fontSize + 3 ? y1 - 3 : y1 + fontSize + 3);
                 ctx.closePath();
             });
-
             if (appState.isDrawingMode && appState.isMouseDownOnCanvas && appState.currentDrawingRect) {
                 ctx.strokeStyle = 'orange'; ctx.lineWidth = defaultLineWidth;
                 const temp_x1 = appState.currentDrawingRect.x1 * scaleX;
@@ -979,9 +898,9 @@
             appState.isDrawingMode = !appState.isDrawingMode;
             toggleDrawingModeBtn.textContent = appState.isDrawingMode ? "Quitter Dessin" : "Mode Dessin BBox";
             imagePreviewContainer.classList.toggle('drawing-mode', appState.isDrawingMode);
-            if (!appState.isDrawingMode) { // Quitting drawing mode
-                appState.selectedBoxId = null; // Deselect any box
-                classLabelInputContainer.style.display = 'none'; // Hide label input
+            if (!appState.isDrawingMode) {
+                appState.selectedBoxId = null;
+                classLabelInputContainer.style.display = 'none';
             }
             drawAnnotations();
             updateAnnotationButtonStates();
@@ -1033,7 +952,6 @@
             if (appState.currentDrawingRect &&
                 (Math.abs(appState.currentDrawingRect.x2 - appState.currentDrawingRect.x1) > 5 &&
                  Math.abs(appState.currentDrawingRect.y2 - appState.currentDrawingRect.y1) > 5)) {
-                // Afficher le popup de saisie de label
                 const canvasRect = overlayCanvas.getBoundingClientRect();
                 classLabelInputContainer.style.left = `${e.clientX - canvasRect.left + 10}px`;
                 classLabelInputContainer.style.top = `${e.clientY - canvasRect.top + 10}px`;
@@ -1041,11 +959,11 @@
                 classLabelInput.value = '';
                 classLabelInput.focus();
             } else {
-                appState.currentDrawingRect = null; // Réinitialiser si trop petit
+                appState.currentDrawingRect = null;
                 drawAnnotations();
             }
         }
-        function handleCanvasMouseLeave() { // Si la souris sort pendant le dessin, annuler
+        function handleCanvasMouseLeave() {
             if (appState.isDrawingMode && appState.isMouseDownOnCanvas) {
                 appState.isMouseDownOnCanvas = false;
                 appState.currentDrawingRect = null;
@@ -1053,13 +971,12 @@
                 classLabelInputContainer.style.display = 'none';
             }
         }
-        function handleCanvasClick(e) { // Pour sélectionner/désélectionner des boîtes existantes
+        function handleCanvasClick(e) {
             if (appState.isDrawingMode || !appState.currentImageFile || appState.currentDetections.length === 0) return;
             const rect = overlayCanvas.getBoundingClientRect();
             const clickX = (e.clientX - rect.left) / (overlayCanvas.width / appState.originalImageWidth);
             const clickY = (e.clientY - rect.top) / (overlayCanvas.height / appState.originalImageHeight);
             let clickedBoxFound = null;
-            // Parcourir en sens inverse pour que les boîtes au-dessus soient sélectionnées en premier
             for (let i = appState.currentDetections.length - 1; i >= 0; i--) {
                 const det = appState.currentDetections[i];
                 if (clickX >= det.box.x1 && clickX <= det.box.x2 && clickY >= det.box.y1 && clickY <= det.box.y2) {
@@ -1078,7 +995,6 @@
         function handleConfirmClassLabel() {
             const label = classLabelInput.value.trim();
             if (label && appState.currentDrawingRect) {
-                // Normaliser les coordonnées (x1 doit être < x2, y1 < y2)
                 const finalRect = {
                     x1: Math.min(appState.currentDrawingRect.x1, appState.currentDrawingRect.x2),
                     y1: Math.min(appState.currentDrawingRect.y1, appState.currentDrawingRect.y2),
@@ -1096,10 +1012,8 @@
             drawAnnotations();
         }
 
-        // --- Modèles (Chargement, Listes) ---
         async function fetchAllModelsForSelects(forceRefresh = false) {
-            if (!forceRefresh && appState.baseModelsList.length > 0 && appState.finetunedRunsList.length > 0) return; // Cache simple
-
+            if (!forceRefresh && appState.baseModelsList.length > 0 && appState.finetunedRunsList.length > 0) return;
             try {
                 logToAppConsole('Chargement des listes de modèles...', 'API_CALL');
                 const [baseModels, ftRuns] = await Promise.all([
@@ -1119,21 +1033,16 @@
             const allModelOptions = [];
             appState.baseModelsList.forEach(m => {
                 allModelOptions.push({
-                    name: `Base: ${m.name}`,
-                    value: m.path,
-                    pathForFinetune: m.name
+                    name: `Base: ${m.name}`, value: m.path, pathForFinetune: m.name
                 });
             });
             appState.finetunedRunsList.forEach(m => {
                 allModelOptions.push({
                     name: `FT: ${m.run_name} (${m.model_name_pt})`,
-                    value: m.model_path_abs,
-                    pathForFinetune: m.model_path_relative_to_home
+                    value: m.model_path_abs, pathForFinetune: m.model_path_relative_to_home
                 });
             });
-
             const createOptionHtml = (model) => `<option value="${model.value}" data-path-for-finetune="${model.pathForFinetune || model.value}">${model.name}</option>`;
-
             modelSelect.innerHTML = allModelOptions.length ? allModelOptions.map(createOptionHtml).join('') : "<option value=''>Aucun modèle disponible</option>";
             ftBaseModelSelect.innerHTML = allModelOptions.length ? allModelOptions.map(createOptionHtml).join('') : "<option value=''>Aucun modèle disponible</option>";
             hpoBaseModelSelect.innerHTML = allModelOptions.length ? allModelOptions.map(createOptionHtml).join('') : "<option value=''>Aucun modèle disponible</option>";
@@ -1142,14 +1051,11 @@
         async function handleLoadModel() {
             const selectedOption = modelSelect.options[modelSelect.selectedIndex];
             if (!selectedOption || !selectedOption.value) { logToAppConsole('Veuillez sélectionner un modèle.', 'WARNING'); return; }
-
             const modelPathToLoad = selectedOption.value;
             const modelNameDisplayed = selectedOption.text;
-
             logToAppConsole(`Chargement du modèle: ${modelNameDisplayed}...`, 'API_CALL');
             modelStatus.textContent = `Chargement de ${modelNameDisplayed.substring(0,30)}...`;
             showLoadingOverlay(`Chargement du modèle...`);
-
             try {
                 const result = await fetchApi('/load_model', { method: 'POST', body: { model_name: modelPathToLoad } });
                 modelStatus.textContent = `Modèle chargé: ${modelNameDisplayed}`;
@@ -1163,33 +1069,26 @@
             }
         }
 
-        // --- Prédiction ---
         async function handlePredict() {
             if (!appState.currentImageFile) { logToAppConsole("Veuillez charger une image.", "WARNING"); return; }
             if (!modelStatus.textContent.includes("Modèle chargé:")) { logToAppConsole("Veuillez charger un modèle.", "WARNING"); return; }
-
             logToAppConsole('Lancement de la prédiction...', 'API_CALL');
             showLoadingOverlay('Prédiction en cours...');
-            appState.currentDetections = []; // Clear previous detections
+            appState.currentDetections = [];
             appState.selectedBoxId = null;
-
             const formData = new FormData();
             formData.append('file', appState.currentImageFile);
-
             const params = new URLSearchParams({
                 confidence: confidenceInput.value, img_size: imgSizePredInput.value, nms_iou: nmsIouInput.value,
                 device: deviceSelectPred.value, use_sahi: useSahiCheckbox.checked,
                 sahi_slice_height: sahiSliceHeightInput.value, sahi_slice_width: sahiSliceWidthInput.value,
                 sahi_overlap_height_ratio: sahiOverlapHeightInput.value, sahi_overlap_width_ratio: sahiOverlapWidthInput.value,
             });
-
             try {
-                // Appel API corrigé sans le paramètre `ngrokSkip`
                 const result = await fetchApi(`/predict?${params.toString()}`, { method: 'POST', body: formData });
                 logToAppConsole(`Prédiction terminée: ${result.detections.length} objets trouvés. Image serveur ID: ${result.image_id}`, 'API_SUCCESS');
                 appState.tempServerImageId = result.image_id;
                 appState.tempServerImageOriginalFilename = result.original_filename;
-
                 appState.currentDetections = result.detections.map(det => ({
                     id: generateUUID(), box: det.box, label: det.label,
                     confidence: det.confidence, source: 'model'
@@ -1210,7 +1109,6 @@
             showLoadingOverlay('Description LLM en cours...');
             llmDescriptionOutputContainer.style.display = 'block';
             llmDescriptionOutput.textContent = 'En cours de description...';
-
             try {
                 const reader = new FileReader();
                 reader.readAsDataURL(appState.currentImageFile);
@@ -1228,25 +1126,21 @@
                     }
                 };
                 reader.onerror = () => { throw new Error("Erreur lecture fichier pour LLM."); }
-            } catch(e) { // catch sync errors from reader setup
+            } catch(e) {
                  logToAppConsole(`Erreur LLM setup: ${e.message}`, 'API_ERROR');
                  hideLoadingOverlay();
             }
         }
 
-        // --- Gestion des Projets ---
         async function fetchProjectsForSelects(forceRefresh = false) {
             if (!forceRefresh && appState.projects.length > 0 && targetProjectSelectForImage.options.length > 1) return;
-
             try {
                 const projectsData = await fetchApi('/finetune_projects');
                 appState.projects = projectsData || [];
                 const projectOptionsHtml = appState.projects.map(p => `<option value="${p.project_id}">${p.name} (${p.image_count} img)</option>`).join('');
-
                 targetProjectSelectForImage.innerHTML = "<option value=''>-- Sélectionner un projet --</option>" + projectOptionsHtml;
                 ftProjectSelect.innerHTML = "<option value=''>-- Sélectionner un projet --</option>" + projectOptionsHtml;
                 hpoProjectSelect.innerHTML = "<option value=''>-- Sélectionner un projet --</option>" + projectOptionsHtml;
-
             } catch (error) {
                 logToAppConsole("Erreur chargement projets pour selects: " + error.message, "API_ERROR");
             }
@@ -1256,9 +1150,9 @@
             projectListContainer.innerHTML = "Chargement...";
             try {
                 const projectsData = await fetchApi('/finetune_projects');
-                appState.projects = projectsData || []; // Mettre à jour la liste globale
+                appState.projects = projectsData || [];
                 renderProjectList();
-                fetchProjectsForSelects(); // Mettre à jour les dropdowns aussi
+                fetchProjectsForSelects();
                 logToAppConsole(`${appState.projects.length} projet(s) chargé(s).`, "API_SUCCESS");
             } catch (error) {
                 projectListContainer.innerHTML = `<p style="color:var(--danger-color)">Erreur chargement projets: ${error.message}</p>`;
@@ -1277,30 +1171,25 @@
                         <button class="action-button small danger delete-project-btn-direct" data-project-id="${p.project_id}" title="Supprimer ce projet">&times;</button>
                     </div>
                 `).join('');
-                // Attacher les écouteurs pour les nouveaux boutons de suppression directe
                 document.querySelectorAll('.delete-project-btn-direct').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Important pour ne pas déclencher la sélection du projet
+                        e.stopPropagation();
                         const projectId = e.target.closest('[data-project-id]').dataset.projectId;
                         handleDeleteProject(projectId);
                     });
                 });
             }
-            updateSelectedProjectDetailsCard(); // Mettre à jour la carte de détails si un projet est sélectionné
+            updateSelectedProjectDetailsCard();
         }
 
-        // --- AMÉLIORATION UX 3.1 (Sélection sans scintillement) ---
         function handleProjectSelectionFromList(event) {
             const item = event.target.closest('.list-item');
             if (item && !event.target.classList.contains('delete-project-btn-direct')) {
                 const projectId = item.dataset.projectId;
                 if (appState.selectedProjectId !== projectId) {
-                    // Retirer 'selected' de l'ancien élément
                     const oldSelectedItem = projectListContainer.querySelector('.list-item.selected');
                     if (oldSelectedItem) oldSelectedItem.classList.remove('selected');
-                    // Ajouter 'selected' au nouvel élément
                     item.classList.add('selected');
-
                     appState.selectedProjectId = projectId;
                     fetchProjectDetails(projectId);
                 }
@@ -1318,20 +1207,17 @@
                 selectedProjectNameDisplay.textContent = "Chargement...";
             }
             projectStatsContent.innerHTML = "Chargement des statistiques...";
-
             try {
                 const project = await fetchApi(`/finetune_projects/${projectId}`);
                 if (project) {
                     const index = appState.projects.findIndex(p => p.project_id === projectId);
                     if (index !== -1) appState.projects[index] = project; else appState.projects.push(project);
-
                     selectedProjectNameDisplay.textContent = project.name;
                     selectedProjectIdDisplay.textContent = project.project_id;
                     selectedProjectCreatedAt.textContent = new Date(project.created_at).toLocaleString();
                     selectedProjectDescDisplay.textContent = project.description || "N/A";
                     updateProjectNameInput.value = project.name;
                     updateProjectDescInput.value = project.description || "";
-
                     selectedProjectTotalImages.textContent = project.image_count;
                     selectedProjectTrainImages.textContent = project.train_image_count;
                     selectedProjectValImages.textContent = project.val_image_count;
@@ -1340,7 +1226,6 @@
                     selectedProjectClasses.textContent = project.classes.join(', ') || "Aucune classe définie";
                     selectedProjectYamlPath.textContent = project.dataset_yaml_path ? project.dataset_yaml_path.replace(HOME_DIR_SERVER, "~/") : "Non généré";
                     selectedProjectIsSplit.textContent = project.is_split ? "Oui" : "Non";
-
                     if (project.stats) {
                         let statsHtml = `<ul>
                             <li><strong>Distribution des Classes:</strong>
@@ -1377,18 +1262,14 @@
             const name = newProjectNameInput.value.trim();
             const description = newProjectDescInput.value.trim();
             if (!name) { logToAppConsole("Le nom du projet est requis.", "VALIDATION_ERROR"); return; }
-
             logToAppConsole(`Création du projet "${name}"...`, "API_CALL");
             try {
                 const newProject = await fetchApi('/finetune_projects', { method: 'POST', body: { name, description } });
                 logToAppConsole(`Projet "${newProject.name}" (ID: ${newProject.project_id}) créé.`, 'API_SUCCESS');
                 newProjectNameInput.value = ''; newProjectDescInput.value = '';
-                await fetchProjectsForDisplay(); // Mettre à jour la liste
-                
-                // Sélectionner le nouveau projet
+                await fetchProjectsForDisplay();
                 const newItem = projectListContainer.querySelector(`[data-project-id="${newProject.project_id}"]`);
                 if(newItem) handleProjectSelectionFromList({ target: newItem });
-
             } catch (error) {
                 logToAppConsole(`Erreur création projet: ${error.message}`, 'API_ERROR');
             }
@@ -1401,7 +1282,7 @@
             try {
                 await fetchApi(`/finetune_projects/${appState.selectedProjectId}`, {method: 'PUT', body: {name: newName, description: currentDesc}});
                 logToAppConsole("Nom du projet mis à jour.", "API_SUCCESS");
-                fetchProjectsForDisplay(); // Rafraîchir liste et détails
+                fetchProjectsForDisplay();
                 fetchProjectDetails(appState.selectedProjectId);
             } catch (error) { logToAppConsole("Erreur MàJ nom: " + error.message, "API_ERROR"); }
         }
@@ -1412,7 +1293,7 @@
             try {
                 await fetchApi(`/finetune_projects/${appState.selectedProjectId}`, {method: 'PUT', body: {name: currentName, description: newDesc}});
                 logToAppConsole("Description du projet mise à jour.", "API_SUCCESS");
-                fetchProjectDetails(appState.selectedProjectId); // Rafraîchir détails
+                fetchProjectDetails(appState.selectedProjectId);
             } catch (error) { logToAppConsole("Erreur MàJ description: " + error.message, "API_ERROR"); }
         }
 
@@ -1422,7 +1303,6 @@
             const valRatio = parseFloat(splitValRatioInput.value);
             const testRatio = parseFloat(splitTestRatioInput.value);
             const shuffle = splitShuffleCheckbox.checked;
-
             if (isNaN(trainRatio) || isNaN(valRatio) || isNaN(testRatio) ||
                 !Number.isFinite(trainRatio + valRatio + testRatio) ||
                 Math.abs((trainRatio + valRatio + testRatio) - 1.0) > 0.001) {
@@ -1440,7 +1320,7 @@
                 });
                 logToAppConsole(`Dataset du projet ${updatedProject.name} divisé.`, 'API_SUCCESS');
                 splitStatus.textContent = "Dataset divisé avec succès."; splitStatus.style.color = "var(--success-color)";
-                fetchProjectDetails(appState.selectedProjectId); // Rafraîchir les détails du projet
+                fetchProjectDetails(appState.selectedProjectId);
             } catch (error) {
                 logToAppConsole(`Erreur division dataset: ${error.message}`, 'API_ERROR');
                 splitStatus.textContent = `Erreur: ${error.message}`; splitStatus.style.color = "var(--danger-color)";
@@ -1478,19 +1358,19 @@
         }
 
         async function handleDeleteProject(projectId) {
+            if (!projectId) return;
             const projectToDelete = appState.projects.find(p => p.project_id === projectId);
             if (!projectToDelete) { logToAppConsole("Projet non trouvé pour suppression.", "WARNING"); return; }
-
-            if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement le projet "${projectToDelete.name}" et toutes ses données (images, labels, etc.) ? Cette action est irréversible.`)) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer définitivement le projet "${projectToDelete.name}" et toutes ses données ? Cette action est irréversible.`)) {
                 logToAppConsole(`Suppression du projet "${projectToDelete.name}"...`, "API_CALL");
                 try {
                     await fetchApi(`/finetune_projects/${projectId}`, { method: 'DELETE' });
                     logToAppConsole(`Projet "${projectToDelete.name}" supprimé.`, "API_SUCCESS");
                     if (appState.selectedProjectId === projectId) {
-                        appState.selectedProjectId = null; // Désélectionner si le projet supprimé était sélectionné
+                        appState.selectedProjectId = null;
                         selectedProjectDetailsCard.style.display = 'none';
                     }
-                    fetchProjectsForDisplay(); // Recharger la liste des projets
+                    fetchProjectsForDisplay();
                 } catch (error) {
                     logToAppConsole(`Erreur suppression projet: ${error.message}`, 'API_ERROR');
                 }
@@ -1502,7 +1382,7 @@
             try {
                 await fetchApi(`/finetune_projects/${appState.selectedProjectId}/update_yaml`, { method: 'POST' }); 
                 logToAppConsole(`Demande de mise à jour YAML envoyée.`, 'API_SUCCESS');
-                fetchProjectDetails(appState.selectedProjectId); // Recharger les détails pour voir le chemin YAML mis à jour
+                fetchProjectDetails(appState.selectedProjectId);
             } catch (error) {
                  logToAppConsole(`Erreur MàJ YAML: ${error.message}`, 'API_ERROR');
             }
@@ -1511,13 +1391,11 @@
         async function handleAddImageToProject() {
             const projectId = targetProjectSelectForImage.value;
             if (!projectId) { logToAppConsole("Sélectionnez un projet cible.", "WARNING"); return; }
-            if (!appState.tempServerImageId) { logToAppConsole("Analysez d'abord une image pour obtenir un ID serveur.", "WARNING"); return; }
+            if (!appState.tempServerImageId) { logToAppConsole("Analysez d'abord une image.", "WARNING"); return; }
             if (appState.currentDetections.length === 0) { logToAppConsole("Aucune annotation à ajouter.", "WARNING"); return; }
-
             const targetSet = targetSetSelectForImage.value;
             logToAppConsole(`Ajout de l'image au projet ${projectId} (set: ${targetSet})...`, "API_CALL");
             showLoadingOverlay("Ajout de l'image au projet...");
-
             const payload = {
                 temp_image_id: appState.tempServerImageId,
                 original_filename: appState.tempServerImageOriginalFilename,
@@ -1526,11 +1404,9 @@
                 })),
                 target_set: targetSet
             };
-
             try {
                 const updatedProject = await fetchApi(`/finetune_projects/${projectId}/images`, { method: 'POST', body: payload });
-                logToAppConsole(`Image ajoutée au projet ${updatedProject.name}. Total: ${updatedProject.image_count}. Classes: ${updatedProject.classes.join(', ')}`, 'API_SUCCESS');
-                
+                logToAppConsole(`Image ajoutée au projet ${updatedProject.name}.`, 'API_SUCCESS');
                 if (appState.selectedProjectId === updatedProject.project_id) {
                     fetchProjectDetails(appState.selectedProjectId);
                 }
@@ -1542,22 +1418,19 @@
             }
         }
 
-        // --- Fine-Tuning & Runs ---
         function populateAugmentationInputs() {
             const container = ftAugmentationsContainer;
-            container.innerHTML = ''; // Clear previous
+            container.innerHTML = '';
             Object.entries(appState.defaultAugmentationSettings).forEach(([key, defaultValue]) => {
                 const div = document.createElement('div');
                 const label = document.createElement('label');
                 label.htmlFor = `ftAug_${key}`;
                 label.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + ":";
-
                 const input = document.createElement('input');
                 input.type = 'number';
                 input.id = `ftAug_${key}`;
                 input.name = key;
                 input.value = defaultValue;
-                
                 if (key.includes('hsv_') || key.includes('translate') || key.includes('scale') || key.includes('flip') || key.includes('mosaic') || key.includes('mixup') || key.includes('copy_paste')) {
                     input.step = 0.01; input.min = 0.0; input.max = 1.0;
                 } else if (key === 'degrees' || key === 'shear') {
@@ -1578,33 +1451,34 @@
             const baseModelOption = ftBaseModelSelect.options[ftBaseModelSelect.selectedIndex];
             if (!projectId) { logToAppConsole("Sélectionnez un projet pour le fine-tuning.", "VALIDATION_ERROR"); return; }
             if (!baseModelOption || !baseModelOption.dataset.pathForFinetune) { logToAppConsole("Sélectionnez un modèle de base valide.", "VALIDATION_ERROR"); return; }
-
             const baseModelPathForServer = baseModelOption.dataset.pathForFinetune;
             const runName = ftRunNameInput.value.trim() || null;
-
             const augmentationsConfig = {};
             Object.keys(appState.defaultAugmentationSettings).forEach(key => {
                 augmentationsConfig[key] = parseFloat(document.getElementById(`ftAug_${key}`).value);
             });
-
+            
             const runConfig = {
-                epochs: parseInt(ftEpochsInput.value), batch_size: parseInt(ftBatchSizeInput.value),
-                img_size: parseInt(ftImgSizeInput.value), optimizer: ftOptimizerSelect.value,
-                lr0: parseFloat(ftLr0Input.value), lrf: parseFloat(ftLrfInput.value),
-                device: ftDeviceSelect.value, patience: parseInt(ftPatienceInput.value),
+                epochs: parseInt(ftEpochsInput.value),
+                batch: parseInt(ftBatchSizeInput.value), 
+                imgsz: parseInt(ftImgSizeInput.value),   
+                optimizer: ftOptimizerSelect.value,
+                lr0: parseFloat(ftLr0Input.value),
+                lrf: parseFloat(ftLrfInput.value),
+                device: ftDeviceSelect.value,
+                patience: parseInt(ftPatienceInput.value),
                 augmentations: augmentationsConfig
             };
+
             const payload = {
                 project_id: projectId, base_model_path: baseModelPathForServer,
                 run_config: runConfig, run_name: runName,
                 save_period: parseInt(ftSavePeriodInput.value)
             };
-
             logToAppConsole(`Lancement du fine-tuning pour projet ${projectId}...`, "API_CALL");
             startFinetuneBtn.disabled = true;
             finetuneTaskStatus.textContent = "Lancement de la tâche de fine-tuning...";
             finetuneTaskStatus.style.color = "var(--info-color)";
-
             try {
                 const taskResult = await fetchApi('/finetune', { method: 'POST', body: payload });
                 logToAppConsole(`Tâche de fine-tuning [${taskResult.task_id}] démarrée. Statut: ${taskResult.status}`, 'API_SUCCESS');
@@ -1651,7 +1525,6 @@
             updateSelectedRunDetailsCard();
         }
 
-        // --- AMÉLIORATION UX 3.1 (Sélection sans scintillement) ---
         function handleRunSelectionFromList(event) {
             const item = event.target.closest('.list-item');
             if (item) {
@@ -1660,7 +1533,6 @@
                     const oldSelectedItem = finetunedModelsListContainer.querySelector('.list-item.selected');
                     if (oldSelectedItem) oldSelectedItem.classList.remove('selected');
                     item.classList.add('selected');
-
                     appState.selectedRunName = runName;
                     fetchRunDetails(runName);
                 }
@@ -1672,13 +1544,11 @@
             selectedFtModelDetailsCard.style.display = 'block';
             ftRunNameDisplay.textContent = "Chargement...";
             ftRunConfigUsed.textContent = ""; ftRunMetricsFinal.textContent = ""; ftRunArtifactsList.innerHTML = "";
-
             try {
                 const runDetails = await fetchApi(`/finetuned_models/${runName}`);
                 if (runDetails) {
                     const idx = appState.finetunedRunsList.findIndex(r => r.run_name === runName);
                     if(idx !== -1) appState.finetunedRunsList[idx] = runDetails; else appState.finetunedRunsList.push(runDetails);
-
                     ftRunNameDisplay.textContent = runDetails.run_name;
                     ftModelPtName.textContent = runDetails.model_name_pt;
                     ftRunProjectId.textContent = runDetails.project_id_source;
@@ -1688,17 +1558,14 @@
                     ftRunConfigUsed.textContent = JSON.stringify(runDetails.run_config_used, null, 2);
                     ftRunMetricsFinal.textContent = runDetails.final_metrics ? JSON.stringify(runDetails.final_metrics, null, 2) : "Métriques non disponibles.";
                     ftRunNotes.value = runDetails.notes || "";
-
                     ftRunArtifactsList.innerHTML = runDetails.artifacts.map(art => `
                         <div class="list-item" data-artifact-path="${art.path_on_server_relative_to_run_dir}" data-artifact-type="${art.type}" title="Cliquez pour voir/télécharger">
                             ${art.name} <small>(${art.type})</small>
                         </div>
                     `).join('') || "<div style='padding:10px; color:var(--secondary-text-color);'>Aucun artefact.</div>";
-
                     ftRunArtifactsList.querySelectorAll('.list-item').forEach(item => {
                         item.addEventListener('click', () => handleViewArtifact(runName, item.dataset.artifactPath, item.dataset.artifactType));
                     });
-
                     logToAppConsole(`Détails du run ${runName} chargés.`, "API_SUCCESS");
                 }
             } catch (error) {
@@ -1721,20 +1588,18 @@
         }
         async function handleViewArtifact(runName, artifactPath, artifactType) {
             const artifactUrl = `${API_BASE_URL}/finetuned_models/${runName}/artifacts/${artifactPath}`;
-            logToAppConsole(`Affichage/Téléchargement artefact: ${artifactPath} de type ${artifactType}`, "INFO");
-            if (artifactType === 'image' || artifactType === 'csv' || artifactType === 'config' || artifactType === 'log') {
-                if (artifactType === 'image') {
-                    showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)}`, '');
-                    document.getElementById('jsonModalContent').innerHTML = `<img src="${artifactUrl}" style="max-width:100%; max-height:70vh;" alt="Artefact ${artifactPath}">`;
-                } else {
-                     try {
-                        const response = await fetchApi(artifactUrl.replace(API_BASE_URL, ''));
-                        const textContent = await response.text();
-                        showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)} (${artifactType})`, textContent);
-                    } catch (error) {
-                        logToAppConsole("Erreur chargement artefact: " + error.message, "API_ERROR");
-                        window.open(artifactUrl, '_blank');
-                    }
+            logToAppConsole(`Affichage/Téléchargement artefact: ${artifactPath}`, "INFO");
+            if (artifactType === 'image') {
+                showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)}`, '');
+                document.getElementById('jsonModalContent').innerHTML = `<img src="${artifactUrl}" style="max-width:100%; max-height:70vh;" alt="Artefact ${artifactPath}">`;
+            } else if (artifactType === 'csv' || artifactType === 'config' || artifactType === 'log') {
+                 try {
+                    const response = await fetchApi(artifactUrl.replace(API_BASE_URL, ''));
+                    const textContent = await response.text();
+                    showModal('jsonModal', `Artefact: ${Path.basename(artifactPath)} (${artifactType})`, textContent);
+                } catch (error) {
+                    logToAppConsole("Erreur chargement artefact: " + error.message, "API_ERROR");
+                    window.open(artifactUrl, '_blank');
                 }
             } else {
                 window.open(artifactUrl, '_blank');
@@ -1745,19 +1610,16 @@
             const format = exportModelFormatSelect.value;
             const imgsz = exportModelImgSizeInput.value ? parseInt(exportModelImgSizeInput.value) : null;
             const half = exportModelHalfCheckbox.checked;
-
             const payload = { format: format };
             if (imgsz) payload.imgsz = imgsz;
             if (half) payload.half = half;
-
             logToAppConsole(`Lancement export du modèle ${appState.selectedRunName} en ${format}...`, "API_CALL");
             exportModelTaskStatus.textContent = `Export en ${format} en cours...`;
             exportModelTaskStatus.style.color = 'var(--info-color)';
             exportTrainedModelBtn.disabled = true;
-
             try {
                 const taskResult = await fetchApi(`/finetuned_models/${appState.selectedRunName}/export`, {method: 'POST', body: payload});
-                logToAppConsole(`Tâche d'export [${taskResult.task_id}] démarrée. Format: ${format}`, "API_SUCCESS");
+                logToAppConsole(`Tâche d'export [${taskResult.task_id}] démarrée.`, "API_SUCCESS");
                 exportModelTaskStatus.textContent = `Tâche ${taskResult.task_id.substring(0,8)}: ${taskResult.message}`;
                 addTaskToMonitor(taskResult);
             } catch(error) {
@@ -1769,25 +1631,20 @@
             }
         }
         
-        // --- AMÉLIORATION 4 (Téléchargement Robuste) ---
         async function handleDownloadSelectedPtModel() {
             if (!appState.selectedRunName) { logToAppConsole("Aucun run sélectionné.", "WARNING"); return; }
             const run = appState.finetunedRunsList.find(r => r.run_name === appState.selectedRunName);
             if (!run || !run.model_path_relative_to_home) { logToAppConsole("Chemin du modèle .pt non trouvé.", "ERROR"); return; }
-
             const pathB64 = btoa(unescape(encodeURIComponent(run.model_path_relative_to_home)))
                                 .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
             const downloadUrl = `/download_model/${pathB64}`;
-            
             logToAppConsole(`Téléchargement de ${run.model_name_pt} demandé...`, "INFO");
             showLoadingOverlay('Préparation du téléchargement...');
-            
             try {
                 const response = await fetchApi(downloadUrl);
                 if (!response.ok) {
                     throw new Error(`Le serveur a répondu avec le statut ${response.status}`);
                 }
-                
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1799,7 +1656,6 @@
                 window.URL.revokeObjectURL(url);
                 a.remove();
                 logToAppConsole("Téléchargement démarré.", "SUCCESS");
-
             } catch (error) {
                 logToAppConsole(`Erreur lors du téléchargement du modèle: ${error.message}`, "API_ERROR");
                 alert(`Impossible de télécharger le modèle: ${error.message}`);
@@ -1808,32 +1664,31 @@
             }
         }
 
-        // --- HPO ---
         async function handleStartHpo() {
             const projectId = hpoProjectSelect.value;
             const baseModelOption = hpoBaseModelSelect.options[hpoBaseModelSelect.selectedIndex];
             if (!projectId) { logToAppConsole("Sélectionnez un projet pour HPO.", "VALIDATION_ERROR"); return; }
             if (!baseModelOption || !baseModelOption.dataset.pathForFinetune) { logToAppConsole("Sélectionnez un modèle de base valide pour HPO.", "VALIDATION_ERROR"); return; }
-
             const baseModelPathForServer = baseModelOption.dataset.pathForFinetune;
             const numTrials = parseInt(hpoNumTrialsInput.value);
 
             const baseRunConfig = {
-                epochs: parseInt(hpoBaseEpochsInput.value), batch_size: parseInt(hpoBaseBatchSizeInput.value),
-                img_size: parseInt(hpoBaseImgSizeInput.value), optimizer: hpoBaseOptimizerSelect.value,
-                device: hpoBaseDeviceSelect.value, augmentations: appState.defaultAugmentationSettings
+                epochs: parseInt(hpoBaseEpochsInput.value),
+                batch: parseInt(hpoBaseBatchSizeInput.value), 
+                imgsz: parseInt(hpoBaseImgSizeInput.value),   
+                optimizer: hpoBaseOptimizerSelect.value,
+                device: hpoBaseDeviceSelect.value,
+                augmentations: appState.defaultAugmentationSettings
             };
 
             const payload = {
                 project_id: projectId, base_model_path: baseModelPathForServer,
                 base_run_config: baseRunConfig, num_trials: numTrials
             };
-
             logToAppConsole(`Lancement HPO pour projet ${projectId} (${numTrials} essais)...`, "API_CALL");
             startHpoBtn.disabled = true;
             hpoTaskStatus.textContent = "Lancement de la tâche HPO...";
             hpoTaskStatus.style.color = "var(--info-color)";
-
             try {
                 const taskResult = await fetchApi('/hpo_tune', { method: 'POST', body: payload });
                 logToAppConsole(`Tâche HPO [${taskResult.task_id}] démarrée. Statut: ${taskResult.status}`, 'API_SUCCESS');
@@ -1849,8 +1704,7 @@
             }
         }
 
-        // --- Gestion des Tâches ---
-        const TASK_REFRESH_INTERVAL = 5000; // ms
+        const TASK_REFRESH_INTERVAL = 5000;
         let periodicTaskRefreshIntervalId = null;
 
         function startPeriodicTaskRefresh() {
@@ -1907,7 +1761,6 @@
                     ${task.result ? `<div><button class="action-button small secondary show-task-result-btn" data-task-id="${task.task_id}" style="margin-top:5px;">Voir Résultat</button></div>` : ''}
                 </div>
             `).join('');
-
             tasksListContainer.querySelectorAll('.show-task-result-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const task = appState.allTasksHistory.find(t => t.task_id === btn.dataset.taskId);
@@ -1919,11 +1772,9 @@
         }
 
         function addTaskToMonitor(taskData, fetchInitialStatus = true) {
-            if (appState.activeTasks[taskData.task_id]) return; // Déjà suivie
-
+            if (appState.activeTasks[taskData.task_id]) return;
             appState.activeTasks[taskData.task_id] = { taskData: taskData };
             logToAppConsole(`Suivi démarré pour tâche ${taskData.task_id}.`, "TASK_MONITOR");
-
             if (fetchInitialStatus) { 
                 checkSingleTaskStatus(taskData.task_id);
             }
@@ -1950,9 +1801,7 @@
                     } else { 
                         appState.allTasksHistory.unshift(task);
                     }
-
                     if (appState.activeTasks[taskId]) appState.activeTasks[taskId].taskData = task;
-                    
                     if (task.task_type === 'finetune' && finetuneTaskStatus) {
                         finetuneTaskStatus.textContent = `Tâche ${task.task_id.substring(0,8)}: ${task.message} (${(task.progress * 100).toFixed(1)}%)`;
                         finetuneTaskStatus.className = `status-text status ${task.status.toLowerCase()}`;
@@ -1963,8 +1812,6 @@
                         hpoTaskStatus.textContent = `Tâche ${task.task_id.substring(0,8)}: ${task.message} (${(task.progress * 100).toFixed(1)}%)`;
                         hpoTaskStatus.className = `status-text status ${task.status.toLowerCase()}`;
                     }
-
-
                     if (task.status === 'completed' || task.status === 'error') {
                         logToAppConsole(`Tâche ${taskId} terminée (${task.status}). Message: ${task.message}`, task.status === 'completed' ? 'TASK_SUCCESS' : 'TASK_ERROR');
                         removeTaskFromMonitor(taskId);
@@ -1987,7 +1834,6 @@
             }
         }
 
-        // --- Utilitaires Globaux ---
         const Path = { basename: (p) => String(p).split(/[\\/]/).pop() };
 
     </script>
